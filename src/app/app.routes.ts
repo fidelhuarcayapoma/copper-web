@@ -1,3 +1,49 @@
 import { Routes } from '@angular/router';
+import { LayoutComponent } from './core/components/layout/layout.component';
+import { UsersComponent } from './features/users/users.component';
+import { HomeComponent } from './features/home/home.component';
+import { authGuard } from './core/guard/auth.guard';
+import { LoginComponent } from './core/auth/login/login.component';
+import { AuthResolver } from './core/resolver/auth.resolver';
+import { AreaComponent } from './features/area/area.component';
+import { EquipmentComponent } from './features/equipment/equipment.component';
+import { CraftComponent } from './features/craft/craft.component';
+import { MiningUnitComponent } from './features/mining-unit/mining-unit.component';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  {
+    path: '',
+    component: LayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        component: HomeComponent,
+      },
+      {
+        path: 'users',
+        component: UsersComponent,
+      },
+      {
+        path: 'mineral-units',
+        component: MiningUnitComponent,
+      },
+      {
+        path: 'areas',
+        component: AreaComponent,
+      },
+      {
+        path: 'equipments',
+        component: EquipmentComponent,
+      },
+      {
+        path: 'crafts',
+        component: CraftComponent,
+      },
+    ],
+  },
+  {
+    path: 'login',
+    component: LoginComponent,
+  },
+];

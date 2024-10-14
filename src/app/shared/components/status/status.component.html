@@ -1,0 +1,17 @@
+@switch (code()) {
+@case (statusCode.ACTIVE){
+<p-tag severity="success" value="{{description()}}"/>
+}
+@case (statusCode.INACTIVE){
+<p-tag severity="danger" value="{{description()}}"/>
+}
+@case (statusCode.SUSPENDED){
+<p-tag  severity="warning" value="{{description()}}"/>
+}
+@case (statusCode.DELETED){
+<p-tag  severity="info" value="{{description()}}"/>
+}
+@default{
+<p-tag  severity="info" value="{{description()}}"/>
+}
+}

@@ -1,0 +1,62 @@
+<div class="content">
+    <form class="form border-round w-25rem p-5 m-3" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="flex align-items-center justify-content-center align-content-center">
+            <h3>COPPER ADMIN</h3>
+        </div>
+        <p-messages [(value)]="messages" [enableService]="false" />
+        <div class="flex-column">
+            <label>Correo: </label>
+        </div>
+        <div class=" flex flex-column">
+            <div class="inputForm">
+                <app-email></app-email>
+                <input type="text" formControlName="email" class="input" placeholder="Ingresa tu correo electrónico"
+                    required />
+            </div>
+            <div *ngIf="loginForm.controls['email'].invalid && loginForm.controls['email'].touched" class="p-error">
+                <p *ngIf="loginForm.controls['email'].errors?.['required']">El correo es obligatorio.</p>
+                <p *ngIf="loginForm.controls['email'].errors?.['pattern']">Formato de correo inválido.</p>
+            </div>
+        </div>
+        <div class="flex-column">
+            <label>Contraseña </label>
+        </div>
+        <div class=" flex flex-column">
+            <div class="inputForm">
+                <app-password></app-password>
+                <input type="password" formControlName="password" class="input" placeholder="Ingresa tu contraseña"
+                    required />
+
+            </div>
+            <div *ngIf="loginForm.controls['password'].invalid && loginForm.controls['password'].touched" class="p-error">
+                <p>La contraseña es obligatoria.</p>
+                
+            </div>
+
+        </div>
+
+
+        <div class="flex-row">
+            <div class="flex align-items-center gap-1">
+                <p-checkbox inputId="ny" [(ngModel)]="remember" value="remember"
+                    formControlName="remember"></p-checkbox>
+                <label for="ny">Recordar cuenta</label>
+            </div>
+            <span class="span">¿Has olvidado tu contraseña?</span>
+        </div>
+        <button pButton [loading]="loading" type="submit" class="button-submit" label="Ingresar"></button>
+ 
+        <p class="p">¿No tienes una cuenta? <span class="span">Registrarse</span></p>
+        <p class="p line">O ingresar con</p>
+        <div class="flex-row">
+            <button class="btn google">
+                <app-google></app-google>
+                Google
+            </button>
+            <button class="btn apple">
+                <app-apple></app-apple>
+                Apple
+            </button>
+        </div>
+    </form>
+</div>
