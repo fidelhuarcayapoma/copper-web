@@ -1,0 +1,54 @@
+:host ::ng-deep .p-dropdown {
+
+    width: 100%;
+    min-width: 1rem;
+    max-width: 100%;
+  }
+  
+  .form-style {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-radius: 5px;
+    margin: auto;
+    width: 100%;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+    width: 100%;
+  }
+  
+  .form-group-inline {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .form-group-inline-item {
+    width: 48%; /* Ajustar para que ambos elementos se distribuyan en la fila */
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+  label {
+    margin-bottom: 8px; /* Aumenta el espacio entre el label y el input */
+    display: block;
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: auto; /* Empuja los botones hacia el final */
+    padding-top: 20px; /* Espacio superior opcional para separar los botones del resto del formulario */
+    gap: 15px; /* Espacio entre los botones */
+  }
+
+ 
