@@ -1,5 +1,5 @@
 [build]
-  publish = "/dist/copper-web"
+  publish = "/dist/copper-web/browser"
   command = "npm run build"
   base = "/"
 
