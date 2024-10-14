@@ -11,22 +11,22 @@ export class MiningUnitService {
   constructor(private http: HttpClient) {}
 
   getMiningUnits(): Observable<any[]> {
-    return this.http.get<any[]>(environment.msManager);
+    return this.http.get<any[]>(`${environment.msManager}/mining-units`);
   }
 
   getMiningUnit(id: number): Observable<any> {
-    return this.http.get<any>(`${environment.msManager}/${id}`);
+    return this.http.get<any>(`${environment.msManager}/mining-units/${id}`);
   }
 
   createMiningUnit(miningUnit: any): Observable<any> {
-    return this.http.post<any>(environment.msManager, miningUnit);
+    return this.http.post<any>(`${environment.msManager}/mining-units`, miningUnit);
   }
 
   updateMiningUnit(id: number, miningUnit: any): Observable<any> {
-    return this.http.put<any>(`${environment.msManager}/${id}`, miningUnit);
+    return this.http.put<any>(`${environment.msManager}/mining-units/${id}`, miningUnit);
   }
 
   deleteMiningUnit(id: number): Observable<any> {
-    return this.http.delete<any>(`${environment.msManager}/${id}`);
+    return this.http.delete<any>(`${environment.msManager}/mining-units/${id}`);
   }
 }
