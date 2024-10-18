@@ -3,6 +3,7 @@ import { Observable } from "rxjs";
 import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment";
 import { User } from "../../features/users/interface/user.interface";
+import { Status } from "../interfaces/status.interface";
 
 @Injectable({
     providedIn: 'root'
@@ -11,8 +12,8 @@ import { User } from "../../features/users/interface/user.interface";
   
     constructor(private http: HttpClient) { }
   
-    getAll():Observable<User[]>{
-        return this.http.get<User[]>(`${environment.msUsers}/users`);
+    getAll():Observable<Status[]>{
+        return this.http.get<Status[]>(`${environment.msManager}/status`);
     }
 
   }

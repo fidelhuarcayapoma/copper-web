@@ -1,1 +1,81 @@
-<p>equipment works!</p>
+<p-toast></p-toast>
+<div class="card">
+  <p-toolbar styleClass="mb-4">
+    <ng-template pTemplate="left">
+      <button pButton pRipple label="Nuevo" icon="pi pi-plus" class="p-button-success mr-2"
+        (click)="openNew()"></button>
+    </ng-template>
+    <ng-template pTemplate="right">
+
+    </ng-template>
+
+
+  </p-toolbar>
+
+  <p-table #dt [value]="equipment" [rows]="10" [paginator]="true"
+    [globalFilterFields]="['name','area.name','status.name']" [rowHover]="true" dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [showCurrentPageReport]="true">
+    <ng-template pTemplate="caption">
+      <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+        <h5 class="m-0">Administrar Equipos</h5>
+        <span class="block mt-2 md:mt-0 p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..."
+            class="w-full sm:w-auto" />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="area.name">Área <p-sortIcon field="area.name"></p-sortIcon></th>
+        <th pSortableColumn="status.name">Estado <p-sortIcon field="status.name"></p-sortIcon></th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-equipment>
+      <tr>
+        <td>{{equipment.name}}</td>
+        <td>{{equipment.area?.name}}</td>
+        <td><app-status [status]="equipment.status"></app-status></td>
+        <td>
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+            (click)="editEquipment(equipment)"></button>
+          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+            (click)="deleteEquipment(equipment)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog [(visible)]="equipmentDialog" [style]="{width: '450px'}" header="Equipment Details" [modal]="true"
+  styleClass="p-fluid">
+  <form [formGroup]="equipmentForm" (ngSubmit)="saveEquipment()">
+    <div class="field">
+      <label for="name">Nombre</label>
+      <input type="text" pInputText id="name" formControlName="name" required autofocus />
+      <small class="p-error" *ngIf="submitted && equipmentForm?.get('name')?.invalid">Name is required.</small>
+    </div>
+    <div class="field">
+      <label for="area">Área</label>
+      <p-dropdown [options]="areas" formControlName="area" optionLabel="name" [filter]="true" filterBy="name"
+        [showClear]="true" placeholder="Select an Area">
+      </p-dropdown>
+      <small class="p-error" *ngIf="submitted && equipmentForm.get('area')?.invalid">Area is required.</small>
+    </div>
+    <div class="field">
+      <label for="status">Estado</label>
+      <p-dropdown [options]="statuses" formControlName="status" optionLabel="name" [filter]="true" filterBy="name"
+        [showClear]="true" placeholder="Seleccione un Estado">
+      </p-dropdown>
+      <small class="p-error" *ngIf="submitted && equipmentForm.get('status')?.invalid">Status is required.</small>
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" (click)="saveEquipment()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>

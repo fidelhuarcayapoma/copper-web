@@ -1,0 +1,75 @@
+<div class="card">
+    <p-toolbar styleClass="mb-4">
+        <ng-template pTemplate="left">
+            <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2"
+                (click)="openNew()"></button>
+        </ng-template>
+    </p-toolbar>
+    <p-table #dt  [value]="documents">
+        <ng-template pTemplate="caption">
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+              <h5 class="m-0">Administrar Documentos</h5>
+              <span class="block mt-2 md:mt-0 p-input-icon-left">
+                <i class="pi pi-search"></i>
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..."
+                  class="w-full sm:w-auto" />
+              </span>
+            </div>
+          </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Nombre</th>
+                <th>URL</th>
+                <th>Manual</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-document>
+            <tr>
+                <td>{{document.name}}</td>
+                <td>{{truncateUrlLogo(document.url)}}</td>
+                <td>{{document.craft.name}}</td>
+                <td>{{document.status.name}}</td>
+                <td>
+                    <button pButton type="button" icon="pi pi-pencil" (click)="editDocument(document)"
+                        class="p-button-rounded p-button-success p-mr-2"></button>
+                    <button pButton type="button" icon="pi pi-trash" (click)="deleteDocument(document.id)"
+                        class="p-button-rounded p-button-danger"></button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<p-dialog [(visible)]="documentDialog" [style]="{width: '450px'}" header="Agregar Documento" [modal]="true" styleClass="p-fluid">
+    <form [formGroup]="documentForm" (ngSubmit)="onSubmit()">
+        <div class="p-fluid p-formgrid p-grid">
+            <div class="field p-col-12 p-md-6">
+                <label for="name">Nombre:</label>
+                <input id="name" type="text" pInputText formControlName="name" />
+            </div>
+            <div class="field p-col-12 p-md-6">
+                <label for="url">URL:</label>
+                <input id="url" type="text" pInputText formControlName="url" />
+            </div>
+            <div class="field p-col-12 p-md-6">
+                <label for="craft">Manual:</label>
+                <p-dropdown id="craft" [options]="crafts" optionLabel="name" formControlName="craft"></p-dropdown>
+            </div>
+            <div class="field p-col-12 p-md-6">
+                <label for="status">Estado:</label>
+                <p-dropdown id="status" [options]="statuses" optionLabel="description" formControlName="status"></p-dropdown>
+            </div>
+        </div>
+
+    </form>
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" type="submit"></button>
+    </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+<p-toast></p-toast>

@@ -1,6 +1,7 @@
 export enum StatusCode {
-    ACTIVE,
-    INACTIVE,
-    SUSPENDED,
-    DELETED
-}
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE",
+    SUSPENDED = "SUSPENDED",
+    DELETED = "DELETED"
+  }
+  

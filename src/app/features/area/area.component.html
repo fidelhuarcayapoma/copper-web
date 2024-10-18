@@ -1,1 +1,76 @@
-<p>area works!</p>
+<div class="card">
+  <p-toolbar styleClass="mb-4">
+    <ng-template pTemplate="left">
+      <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table #dt [value]="areas" [rows]="10" [paginator]="true"
+    [globalFilterFields]="['name','miningUnit.name','status.name']" [rowHover]="true" dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [showCurrentPageReport]="true">
+    <ng-template pTemplate="caption">
+      <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+        <h5 class="m-0">Administrar Áreas</h5>
+        <span class="block mt-2 md:mt-0 p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..."
+            class="w-full sm:w-auto" />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="miningUnit.name">Unidad Minera <p-sortIcon field="miningUnit.name"></p-sortIcon></th>
+        <th pSortableColumn="status.name">Estado <p-sortIcon field="status.name"></p-sortIcon></th>
+        <th pSortableColumn="createdAt">Fecha de adición <p-sortIcon field="createdAt"></p-sortIcon></th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-area>
+      <tr>
+        <td>{{area.name}}</td>
+        <td>{{area.miningUnit?.name}}</td>
+        <td><app-status [status]="area.status"></app-status></td>
+        <td>{{area.createdAt}}</td>
+
+        <td>
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
+            (click)="editArea(area)"></button>
+          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+            (click)="deleteArea(area)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog [(visible)]="areaDialog" [style]="{width: '450px'}" header="Area Details" [modal]="true" styleClass="p-fluid">
+  <form [formGroup]="areaForm" (ngSubmit)="saveArea()">
+    <div class="field">
+      <label for="name">Nombre</label>
+      <input type="text" pInputText id="name" formControlName="name" required autofocus />
+      <small class="p-error" *ngIf="submitted && areaForm.get('name')?.invalid">Name is required.</small>
+    </div>
+    <div class="field">
+      <label for="miningUnit">Unidad Minera</label>
+      <p-dropdown [options]="miningUnits" formControlName="miningUnit" optionLabel="name" [filter]="true"
+        filterBy="name" [showClear]="true" placeholder="Select a Mining Unit">
+      </p-dropdown>
+      <small class="p-error" *ngIf="submitted && areaForm.get('miningUnit')?.invalid">Mining Unit is required.</small>
+    </div>
+    <div class="field">
+      <label for="status">Estado</label>
+      <p-dropdown [options]="statuses" formControlName="status" optionLabel="name" [filter]="true" filterBy="name"
+        [showClear]="true" placeholder="Select a Status">
+      </p-dropdown>
+      <small class="p-error" *ngIf="submitted && areaForm.get('status')?.invalid">Status is required.</small>
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveArea()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>

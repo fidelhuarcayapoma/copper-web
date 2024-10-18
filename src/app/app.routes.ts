@@ -9,6 +9,7 @@ import { AreaComponent } from './features/area/area.component';
 import { EquipmentComponent } from './features/equipment/equipment.component';
 import { CraftComponent } from './features/craft/craft.component';
 import { MiningUnitComponent } from './features/mining-unit/mining-unit.component';
+import { DocumentComponent } from './features/document/document.component';
 
 export const routes: Routes = [
   {
@@ -40,6 +41,11 @@ export const routes: Routes = [
         path: 'crafts',
         component: CraftComponent,
       },
+
+      {
+        path: 'documents', 
+        component: DocumentComponent,
+      }
     ],
   },
   {

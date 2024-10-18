@@ -69,6 +69,11 @@ export class MenuComponent implements OnInit {
                                 
                                 
                             },
+                            {
+                                label: 'Documentos', icon: 'pi pi-fw pi-file', routerLink: ['/documents'],
+                                
+                                
+                            },
 
             
                         ]

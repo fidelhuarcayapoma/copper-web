@@ -5,6 +5,9 @@ import { MiningUnitService } from './services/mining-unit.service';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
+import { MiningUnit } from './interfaces/mining-unit.interface';
+import { StatusComponent } from '../../shared/components/status/status.component';
+import { Table } from 'primeng/table';
 
 @Component({
   selector: 'app-mining-unit',
@@ -13,13 +16,14 @@ import { ToolbarModule } from 'primeng/toolbar';
     CommonModule,
     ReactiveFormsModule,
     ToolbarModule,
+    StatusComponent,
   ],
   providers: [MessageService, ConfirmationService, MiningUnitService],
   templateUrl: './mining-unit.component.html',
   styleUrl: './mining-unit.component.scss'
 })
 export class MiningUnitComponent  implements OnInit{
-  miningUnits: any[] = [];
+  miningUnits: MiningUnit[] = [];
   miningUnitForm!: FormGroup;
   miningUnitDialog: boolean  = false;
   submitted: boolean  = false;
@@ -96,27 +100,27 @@ export class MiningUnitComponent  implements OnInit{
     if (this.miningUnitForm.valid) {
       const miningUnitData = this.miningUnitForm.value;
       if (miningUnitData.id) {
-        this.miningUnitService.updateMiningUnit(miningUnitData.id, miningUnitData).subscribe(
-          (result) => {
+        this.miningUnitService.updateMiningUnit(miningUnitData.id, miningUnitData).subscribe({
+          next:(result) => {
             this.miningUnits[this.findIndexById(result.id)] = result;
             this.messageService.add({severity:'success', summary: 'Successful', detail: 'Mining Unit Updated', life: 3000});
           },
-          (error) => {
+          error:(error) => {
             console.error('Error updating mining unit', error);
             this.messageService.add({severity:'error', summary: 'Error', detail: 'Failed to update Mining Unit', life: 3000});
           }
-        );
+        });
       } else {
-        this.miningUnitService.createMiningUnit(miningUnitData).subscribe(
-          (result) => {
+        this.miningUnitService.createMiningUnit(miningUnitData).subscribe({
+          next:(result) => {
             this.miningUnits.push(result);
             this.messageService.add({severity:'success', summary: 'Successful', detail: 'Mining Unit Created', life: 3000});
           },
-          (error) => {
+          error:(error) => {
             console.error('Error creating mining unit', error);
             this.messageService.add({severity:'error', summary: 'Error', detail: 'Failed to create Mining Unit', life: 3000});
           }
-        );
+        });
       }
 
       this.miningUnits = [...this.miningUnits];
@@ -135,6 +139,10 @@ export class MiningUnitComponent  implements OnInit{
     }
     return index;
   }
+
+  onGlobalFilter(table: Table, event: Event) {
+    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+}
 
   truncateUrlLogo(url: string): string {
     if (url && url.length > 30) {
