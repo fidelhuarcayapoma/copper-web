@@ -1,7 +1,7 @@
 <div class="card">
     <p-toolbar styleClass="mb-4">
         <ng-template pTemplate="left">
-            <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2"
+            <button pButton pRipple label="Nuevo" icon="pi pi-plus" class="p-button-success mr-2"
                 (click)="openNew()"></button>
         </ng-template>
     </p-toolbar>
@@ -28,12 +28,12 @@
         <ng-template pTemplate="body" let-document>
             <tr>
                 <td>{{document.name}}</td>
-                <td>{{truncateUrlLogo(document.url)}}</td>
+                <td><a href="{{document.url}}" target="_blank">{{document.url}}</a></td>
                 <td>{{document.craft.name}}</td>
-                <td>{{document.status.name}}</td>
+                <td><app-status [status]="document.status"></app-status></td>
                 <td>
                     <button pButton type="button" icon="pi pi-pencil" (click)="editDocument(document)"
-                        class="p-button-rounded p-button-success p-mr-2"></button>
+                        class="p-button-rounded p-button-success mr-2"></button>
                     <button pButton type="button" icon="pi pi-trash" (click)="deleteDocument(document.id)"
                         class="p-button-rounded p-button-danger"></button>
                 </td>
@@ -43,7 +43,7 @@
 </div>
 
 <p-dialog [(visible)]="documentDialog" [style]="{width: '450px'}" header="Agregar Documento" [modal]="true" styleClass="p-fluid">
-    <form [formGroup]="documentForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="documentForm" >
         <div class="p-fluid p-formgrid p-grid">
             <div class="field p-col-12 p-md-6">
                 <label for="name">Nombre:</label>
@@ -55,18 +55,18 @@
             </div>
             <div class="field p-col-12 p-md-6">
                 <label for="craft">Manual:</label>
-                <p-dropdown id="craft" [options]="crafts" optionLabel="name" formControlName="craft"></p-dropdown>
+                <p-dropdown id="craft" [options]="crafts" optionLabel="name" formControlName="craftId" optionValue="id" appendTo="body"></p-dropdown>
             </div>
             <div class="field p-col-12 p-md-6">
                 <label for="status">Estado:</label>
-                <p-dropdown id="status" [options]="statuses" optionLabel="description" formControlName="status"></p-dropdown>
+                <p-dropdown id="status" [options]="statuses" optionLabel="description" formControlName="statusId" optionValue="id" appendTo="body"></p-dropdown>
             </div>
         </div>
 
     </form>
     <ng-template pTemplate="footer">
-        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-        <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" type="submit"></button>
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" (click)="onSubmit()"></button>
     </ng-template>
 </p-dialog>
 

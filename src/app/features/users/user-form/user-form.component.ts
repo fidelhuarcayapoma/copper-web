@@ -1,12 +1,16 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { User } from '../interface/user.interface';
+import { FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { Role, User } from '../interface/user.interface';
 import { UsersService } from '../service/users.service';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
 import { CommonModule } from '@angular/common';
-import { DialogService } from 'primeng/dynamicdialog';
+import { DialogService, DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ButtonModule } from 'primeng/button';
+import { RoleService } from '../../../shared/service/role.service';
+import { tap } from 'rxjs';
+import { StatusService } from '../../../shared/service/status.service';
+import { Status } from '../../../shared/interfaces/status.interface';
 
 @Component({
   selector: 'app-user-form',
@@ -19,61 +23,97 @@ import { ButtonModule } from 'primeng/button';
     CommonModule,
     ButtonModule,
   ],
-  providers:[
-    DialogService 
+  providers: [
+    DialogService,
+    RoleService,
   ],
   templateUrl: './user-form.component.html',
   styleUrl: './user-form.component.scss'
 })
 export class UserFormComponent {
-  @Input() user: User | null = null;
+  user: User | null = null;
   @Output() onClose = new EventEmitter<User>();
 
   userForm: FormGroup;
-  roles: { id: number; description: string }[] = [
-    { id: 1, description: 'Admin' },
-    { id: 2, description: 'User' },
-    { id: 3, description: 'Viewer' },
-  ];
-  constructor(private fb: FormBuilder, private usersService: UsersService) {
-    this.userForm = this.fb.group({
-      name: ['', Validators.required],
-      lastName: ['', Validators.required],
-      secondLastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      role: [null, Validators.required], // Validación para que sea obligatorio seleccionar un rol
+  roles: Role[] = [];
+  statuses: Status[] = [];
+
+  constructor(
+    private usersService: UsersService,
+    public config: DynamicDialogConfig,
+    private roleService: RoleService,
+    private statusService: StatusService,
+    private ref: DynamicDialogRef,
+  ) {
+    this.userForm = new FormGroup({
+      name: new FormControl('', Validators.required),
+      lastName: new FormControl('', Validators.required),
+      secondLastName: new FormControl(''), // Añade segundo apellido en el form
+      dni: new FormControl('', [Validators.required, Validators.minLength(8), Validators.maxLength(8)]), // Agrega el campo DNI
+      email: new FormControl('', [Validators.required, Validators.email]),
+      roleId: new FormControl('', Validators.required),
+      statusId: new FormControl('', Validators.required),
     });
   }
 
   ngOnInit() {
-    if (this.user) {
-      this.userForm.patchValue(this.user); // Si es edición, rellenar los campos
-    }
+    this.userForm.reset();
+    this.user = this.config.data?.user || null;
+
+    this.loadRoles();
+    this.loadStatuses();
+
   }
 
   save() {
     if (this.userForm.invalid) {
-      console.log('Formulario inválido');
       return;
     }
 
     const userData = this.userForm.value;
 
     if (this.user) {
-      // Editar usuario
       this.usersService.updateUser(this.user.id, userData).subscribe((updatedUser: User) => {
         this.onClose.emit(updatedUser);
+        this.ref?.close();
       });
     } else {
-      console.log('Formulario inválido xxx');
-
       this.usersService.createUser(userData).subscribe((newUser: User) => {
-        this.onClose.emit(newUser);
+        this.onClose.emit(newUser); 
+        this.ref?.close();
+
+
       });
     }
   }
 
   cancel() {
     this.onClose.emit(undefined); // Cerrar el modal sin guardar
+  }
+
+  loadRoles() {
+    this.roleService.getAll()
+      .subscribe((roles: Role[]) => {
+        this.roles = roles;
+        if (this.user) {
+
+          this.userForm.patchValue({
+            ...this.user,
+            statusId: this.user.status.id,
+            roleId: this.user.roles[0].id,
+
+          });
+        }
+      });
+  }
+  loadStatuses() {
+    this.statusService.getAll().subscribe({
+      next: (data) => {
+        this.statuses = data;
+      },
+      error: (error) => {
+        console.error('Error loading statuses', error);
+      }
+    });
   }
 }

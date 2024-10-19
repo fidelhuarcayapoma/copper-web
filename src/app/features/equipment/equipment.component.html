@@ -12,7 +12,7 @@
 
   </p-toolbar>
 
-  <p-table #dt [value]="equipment" [rows]="10" [paginator]="true"
+  <p-table #dt [value]="equipments" [rows]="10" [paginator]="true"
     [globalFilterFields]="['name','area.name','status.name']" [rowHover]="true" dataKey="id"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [showCurrentPageReport]="true">
     <ng-template pTemplate="caption">
@@ -30,7 +30,7 @@
         <th pSortableColumn="name">Nombre <p-sortIcon field="name"></p-sortIcon></th>
         <th pSortableColumn="area.name">Área <p-sortIcon field="area.name"></p-sortIcon></th>
         <th pSortableColumn="status.name">Estado <p-sortIcon field="status.name"></p-sortIcon></th>
-        <th></th>
+        <th>Acciones</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-equipment>
@@ -49,27 +49,27 @@
   </p-table>
 </div>
 
-<p-dialog [(visible)]="equipmentDialog" [style]="{width: '450px'}" header="Equipment Details" [modal]="true"
+<p-dialog [(visible)]="equipmentDialog" [style]="{width: '450px'}" header="Administrar Equipos" [modal]="true"
   styleClass="p-fluid">
   <form [formGroup]="equipmentForm" (ngSubmit)="saveEquipment()">
     <div class="field">
-      <label for="name">Nombre</label>
+      <label for="name">Nombre:</label>
       <input type="text" pInputText id="name" formControlName="name" required autofocus />
       <small class="p-error" *ngIf="submitted && equipmentForm?.get('name')?.invalid">Name is required.</small>
     </div>
     <div class="field">
-      <label for="area">Área</label>
-      <p-dropdown [options]="areas" formControlName="area" optionLabel="name" [filter]="true" filterBy="name"
-        [showClear]="true" placeholder="Select an Area">
+      <label for="area">Área:</label>
+      <p-dropdown [options]="areas" formControlName="areaId" optionLabel="name" optionValue="id" [filter]="true" filterBy="name"
+        [showClear]="true" placeholder="Seleccione una Área" appendTo="body">
       </p-dropdown>
-      <small class="p-error" *ngIf="submitted && equipmentForm.get('area')?.invalid">Area is required.</small>
+      <small class="p-error" *ngIf="submitted && equipmentForm.get('areaId')?.invalid">Area is required.</small>
     </div>
     <div class="field">
-      <label for="status">Estado</label>
-      <p-dropdown [options]="statuses" formControlName="status" optionLabel="name" [filter]="true" filterBy="name"
-        [showClear]="true" placeholder="Seleccione un Estado">
+      <label for="status">Estado:</label>
+      <p-dropdown [options]="statuses" formControlName="statusId" optionLabel="description"  optionValue="id"
+        [showClear]="true" placeholder="Seleccione un Estado" appendTo="body">
       </p-dropdown>
-      <small class="p-error" *ngIf="submitted && equipmentForm.get('status')?.invalid">Status is required.</small>
+      <small class="p-error" *ngIf="submitted && equipmentForm.get('statusId')?.invalid">Status is required.</small>
     </div>
   </form>
   <ng-template pTemplate="footer">

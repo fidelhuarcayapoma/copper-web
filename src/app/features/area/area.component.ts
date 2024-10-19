@@ -18,8 +18,8 @@ import { Table } from 'primeng/table';
   selector: 'app-area',
   standalone: true,
   imports: [
-    ...PRIMENG_MODULES, 
-    CommonModule, 
+    ...PRIMENG_MODULES,
+    CommonModule,
     ToolbarModule,
     ReactiveFormsModule,
     StatusComponent,
@@ -35,6 +35,8 @@ export class AreaComponent implements OnInit {
   areaForm!: FormGroup;
   areaDialog: boolean = false;
   submitted: boolean = false;
+
+  selectedArea: Area | null = null;
 
   constructor(
     private areaService: AreaService,
@@ -54,8 +56,8 @@ export class AreaComponent implements OnInit {
   initForm() {
     this.areaForm = new FormGroup({
       name: new FormControl(null, [Validators.required]),
-      miningUnit: new FormControl(null, [Validators.required]),
-      status: new FormControl(null, [Validators.required]),
+      miningUnitId: new FormControl(null, [Validators.required]),
+      statusId: new FormControl(null, [Validators.required]),
     });
   }
 
@@ -95,35 +97,35 @@ export class AreaComponent implements OnInit {
   openNew() {
     this.submitted = false;
     this.areaDialog = true;
-    this.initForm();
+    this.selectedArea = null;
   }
 
-  deleteArea(area: any) {
+  deleteArea(area: Area) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete this Area?',
-      header: 'Confirm',
+      message: '¿Estás seguro que deseas eliminar esta área?',
+      header: 'Confirmar',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.areaService.deleteArea(area.id).subscribe(
-          () => {
+        this.areaService.deleteArea(area.id).subscribe({
+          next: () => {
             this.areas = this.areas.filter(val => val.id !== area.id);
-            this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Area Deleted', life: 3000 });
+            this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Área Eliminada', life: 3000 });
           },
-          (error) => {
+          error: (error) => {
             console.error('Error deleting area', error);
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete Area', life: 3000 });
           }
-        );
+        });
       }
     });
   }
 
-  editArea(area: any) {
+  editArea(area: Area) {
+    this.selectedArea = area;
     this.areaForm.patchValue({
-      id: area.id,
-      name: area.name,
-      miningUnit: area.miningUnit,
-      status: area.status
+      ...area,
+      miningUnitId: area?.miningUnit?.id,
+      statusId: area?.status?.id
     });
     this.areaDialog = true;
   }
@@ -139,10 +141,10 @@ export class AreaComponent implements OnInit {
 
     if (this.areaForm.valid) {
       const areaData = this.areaForm.value;
-      if (areaData.id) {
-        this.areaService.updateArea(areaData.id, areaData).subscribe(
+      if (this.selectedArea?.id) {
+        this.areaService.updateArea(this.selectedArea.id, areaData).subscribe(
           (result) => {
-            this.areas[this.findIndexById(result.id)] = result;
+            this.loadAreas();
             this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Area Updated', life: 3000 });
           },
           (error) => {
@@ -153,7 +155,7 @@ export class AreaComponent implements OnInit {
       } else {
         this.areaService.createArea(areaData).subscribe(
           (result) => {
-            this.areas.push(result);
+            this.loadAreas();
             this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Area Created', life: 3000 });
           },
           (error) => {
@@ -163,7 +165,7 @@ export class AreaComponent implements OnInit {
         );
       }
 
-      this.areas = [...this.areas];
+
       this.areaDialog = false;
       this.initForm();
     }
@@ -182,5 +184,5 @@ export class AreaComponent implements OnInit {
 
   onGlobalFilter(table: Table, event: Event) {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-}
+  }
 }

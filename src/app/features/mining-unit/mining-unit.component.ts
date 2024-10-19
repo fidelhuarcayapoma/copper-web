@@ -8,6 +8,8 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { MiningUnit } from './interfaces/mining-unit.interface';
 import { StatusComponent } from '../../shared/components/status/status.component';
 import { Table } from 'primeng/table';
+import { Status } from '../../shared/interfaces/status.interface';
+import { StatusService } from '../../shared/service/status.service';
 
 @Component({
   selector: 'app-mining-unit',
@@ -27,22 +29,27 @@ export class MiningUnitComponent  implements OnInit{
   miningUnitForm!: FormGroup;
   miningUnitDialog: boolean  = false;
   submitted: boolean  = false;
+  selectedMiningUnit: MiningUnit | null = null;
+  statuses: Status[] = [];
 
   constructor(
     private miningUnitService: MiningUnitService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private statusService: StatusService,
   ) {}
 
   ngOnInit() {
     this.loadMiningUnits();
+    this.loadStatuses();
     this.initForm();
   }
 
   initForm() {
     this.miningUnitForm = new FormGroup({
       name: new FormControl(null, [Validators.required]),
-      urlLogo: new FormControl(null),
+      urlLogo: new FormControl(null, [Validators.required]),
+      statusId: new FormControl(null, []),
     });
   }
 
@@ -57,6 +64,16 @@ export class MiningUnitComponent  implements OnInit{
     } );
   }
 
+  loadStatuses() {
+    this.statusService.getAll().subscribe({
+      next: (data) => {
+        this.statuses = data;
+      },
+      error: (error) => {
+        console.error('Error loading statuses', error);
+      }
+    });
+  }
   openNew() {
     this.submitted = false;
     this.miningUnitDialog = true;
@@ -83,9 +100,13 @@ export class MiningUnitComponent  implements OnInit{
     });
   }
 
-  editMiningUnit(miningUnit: any) {
-    this.miningUnitForm.patchValue(miningUnit);
+  editMiningUnit(miningUnit: MiningUnit) {
+    this.miningUnitForm.patchValue({
+      ...miningUnit,
+      statusId: miningUnit.status?.id
+    });
     this.miningUnitDialog = true;
+    this.selectedMiningUnit = miningUnit;
   }
 
   hideDialog() {
@@ -99,10 +120,10 @@ export class MiningUnitComponent  implements OnInit{
 
     if (this.miningUnitForm.valid) {
       const miningUnitData = this.miningUnitForm.value;
-      if (miningUnitData.id) {
-        this.miningUnitService.updateMiningUnit(miningUnitData.id, miningUnitData).subscribe({
+      if (this.selectedMiningUnit?.id) {
+        this.miningUnitService.updateMiningUnit(this.selectedMiningUnit?.id, miningUnitData).subscribe({
           next:(result) => {
-            this.miningUnits[this.findIndexById(result.id)] = result;
+            this.loadMiningUnits();
             this.messageService.add({severity:'success', summary: 'Successful', detail: 'Mining Unit Updated', life: 3000});
           },
           error:(error) => {
@@ -113,7 +134,7 @@ export class MiningUnitComponent  implements OnInit{
       } else {
         this.miningUnitService.createMiningUnit(miningUnitData).subscribe({
           next:(result) => {
-            this.miningUnits.push(result);
+            this.loadMiningUnits();
             this.messageService.add({severity:'success', summary: 'Successful', detail: 'Mining Unit Created', life: 3000});
           },
           error:(error) => {

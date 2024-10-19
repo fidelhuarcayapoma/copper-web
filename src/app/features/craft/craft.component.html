@@ -2,7 +2,7 @@
 
   <p-toolbar styleClass="mb-4">
     <ng-template pTemplate="left">
-      <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+      <button pButton pRipple label="Nuevo" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
     </ng-template>
   </p-toolbar>
   
@@ -31,7 +31,7 @@
         <td>{{craft?.equipment?.name}}</td>
         <td><app-status [status]="craft.status"></app-status></td>
         <td>
-          <button pButton type="button" icon="pi pi-pencil" (click)="editCraft(craft)" class="p-button-rounded p-button-success p-mr-2"></button>
+          <button pButton type="button" icon="pi pi-pencil" (click)="editCraft(craft)" class="p-button-rounded p-button-success mr-2"></button>
           <button pButton type="button" icon="pi pi-trash" (click)="deleteCraft(craft.id)" class="p-button-rounded p-button-danger"></button>
         </td>
       </tr>
@@ -39,29 +39,29 @@
   </p-table>
 
 
-  <p-dialog [(visible)]="craftDialog" [style]="{width: '450px'}" header="Craft Details" [modal]="true" styleClass="p-fluid">
+  <p-dialog [(visible)]="craftDialog" [style]="{width: '450px'}" header="Administrar Manuales" [modal]="true" styleClass="p-fluid">
     <form [formGroup]="craftForm" (ngSubmit)="onSubmit()">
       <div class="field">
-        <label for="name">Name</label>
+        <label for="name">Nombre:</label>
         <input type="text" pInputText id="name" formControlName="name" required autofocus />
         <small class="p-error" *ngIf="submitted && craftForm.get('name')?.invalid">Name is required.</small>
       </div>
       <div class="field">
-        <label for="equipment">Equipment</label>
+        <label for="equipment">Equipo:</label>
         <p-dropdown [options]="equipments" formControlName="equipmentId" optionLabel="name" optionValue="id" [showClear]="true" placeholder="Select Equipment">
         </p-dropdown>
         <small class="p-error" *ngIf="submitted && craftForm.get('equipmentId')?.invalid">Equipment is required.</small>
       </div>
       <div class="field">
-        <label for="status">Status</label>
-        <p-dropdown [options]="statuses" formControlName="status" optionLabel="name" optionValue="id" placeholder="Select Status">
+        <label for="status">Estado:</label>
+        <p-dropdown [options]="statuses" formControlName="statusId" optionLabel="description" optionValue="id" placeholder="Select Status" appendTo="body">
         </p-dropdown>
-        <small class="p-error" *ngIf="submitted && craftForm.get('status')?.invalid">Status is required.</small>
+        <small class="p-error" *ngIf="submitted && craftForm.get('statusId')?.invalid">Status is required.</small>
       </div>
     </form>
     <ng-template pTemplate="footer">
-      <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-      <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveCraft()"></button>
+      <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" (click)="saveCraft()"></button>
     </ng-template>
   </p-dialog>
   

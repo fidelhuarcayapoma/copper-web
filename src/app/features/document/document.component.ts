@@ -63,8 +63,8 @@ export class DocumentComponent implements OnInit {
     this.documentForm = new FormGroup({
       name: new FormControl('', [Validators.required]),
       url: new FormControl('', [Validators.required]),
-      craft: new FormControl('', [Validators.required]),
-      status: new FormControl(null),
+      craftId: new FormControl('', [Validators.required]),
+      statusId: new FormControl(null),
     });
   }
 
@@ -104,7 +104,7 @@ export class DocumentComponent implements OnInit {
     });
   }
 
-  onSubmit() {
+  onSubmit() {console.log('Formdff is invalid');
     if (this.documentForm.valid) {
       if (this.isEditing) {
         this.updateDocument();
@@ -112,13 +112,14 @@ export class DocumentComponent implements OnInit {
         this.createDocument();
       }
     } else {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Please fill all required fields' });
+      this.submitted = true;
+      console.log('Form is invalid');
+      this.documentForm.markAsDirty();
     }
   }
 
   createDocument() {
     const document = this.documentForm.value;
-    console.log(document);
     this.documentService.createDocument(document).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Document created successfully' });
@@ -133,10 +134,10 @@ export class DocumentComponent implements OnInit {
   }
 
   updateDocument() {
-    const document = this.documentForm.value;
+    const document = { ...this.documentForm.value, id: this.selectedDocument?.id };
     this.documentService.updateDocument(document).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Document updated successfully' });
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Documento actualizado exitosamente' });
         this.loadDocuments();
         this.hideDialog();
       },
@@ -149,7 +150,11 @@ export class DocumentComponent implements OnInit {
 
   editDocument(document: Document) {
     this.isEditing = true;
-    this.documentForm.patchValue(document); 
+    this.documentForm.patchValue({
+      ...document,
+      craftId: document?.craft?.id,
+      statusId: document?.status?.id
+    }); 
     this.selectedDocument = document;
     this.documentDialog = true;
   }
@@ -170,6 +175,8 @@ export class DocumentComponent implements OnInit {
   openNew() {
     this.submitted = false;
     this.documentDialog = true;
+    this.selectedDocument = null;
+    this.isEditing = false;
   }
   hideDialog() {
     this.isEditing = false;

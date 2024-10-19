@@ -28,13 +28,13 @@ import { Table } from 'primeng/table';
   styleUrl: './equipment.component.scss'
 })
 export class EquipmentComponent {
-  equipment: Equipment[] = [];
+  equipments: Equipment[] = [];
   areas: Area[] = [];
   statuses: Status[] = [];
   equipmentForm!: FormGroup;
   equipmentDialog: boolean = false;
   submitted: boolean = false;
-
+  selectedEquipment: Equipment | null = null;
   constructor(
     private equipmentService: EquipmentService,
     private areaService: AreaService,
@@ -53,15 +53,15 @@ export class EquipmentComponent {
   initForm() {
     this.equipmentForm = new FormGroup({
       name: new FormControl(null, [Validators.required]),
-      area: new FormControl(null, [Validators.required]),
-      status: new FormControl(null, []),
+      areaId: new FormControl(null, [Validators.required]),
+      statusId: new FormControl(null, []),
     })
   }
 
   loadEquipment() {
     this.equipmentService.getAll().subscribe({
       next: (data) => {
-        this.equipment = data;
+        this.equipments = data;
       },
       error: (error) => {
         console.error('Error loading equipment', error);
@@ -94,7 +94,7 @@ export class EquipmentComponent {
   openNew() {
     this.submitted = false;
     this.equipmentDialog = true;
-    this.initForm();
+    this.selectedEquipment = null;
   }
 
   deleteEquipment(equipment: any) {
@@ -105,7 +105,7 @@ export class EquipmentComponent {
       accept: () => {
         this.equipmentService.deleteEquipment(equipment.id).subscribe(
           () => {
-            this.equipment = this.equipment.filter(val => val.id !== equipment.id);
+            this.equipments = this.equipments.filter(val => val.id !== equipment.id);
             this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Equipment Deleted', life: 3000 });
           },
           (error) => {
@@ -117,14 +117,14 @@ export class EquipmentComponent {
     });
   }
 
-  editEquipment(equipment: any) {
+  editEquipment(equipment: Equipment) {
     this.equipmentForm.patchValue({
-      id: equipment.id,
-      name: equipment.name,
-      area: equipment.area,
-      status: equipment.status
+      ...equipment,
+      areaId: equipment?.area?.id,
+      statusId: equipment?.status?.id
     });
     this.equipmentDialog = true;
+    this.selectedEquipment = equipment;
   }
 
   hideDialog() {
@@ -138,31 +138,31 @@ export class EquipmentComponent {
 
     if (this.equipmentForm.valid) {
       const equipmentData = this.equipmentForm.value;
-      if (equipmentData.id) {
-        this.equipmentService.updateEquipment(equipmentData.id, equipmentData).subscribe(
-          (result) => {
-            this.equipment[this.findIndexById(result.id)] = result;
+      if (this.selectedEquipment?.id) {
+        this.equipmentService.updateEquipment(this.selectedEquipment.id, equipmentData).subscribe({
+          next: (result) => {
+            this.loadEquipment();
             this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Equipment Updated', life: 3000 });
           },
-          (error) => {
+          error: (error) => {
             console.error('Error updating equipment', error);
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update Equipment', life: 3000 });
           }
-        );
+        });
       } else {
-        this.equipmentService.createEquipment(equipmentData).subscribe(
-          (result) => {
-            this.equipment.push(result);
+        this.equipmentService.createEquipment(equipmentData).subscribe({
+          next: (result) => {
+            this.loadEquipment();
             this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Equipment Created', life: 3000 });
           },
-          (error) => {
+          error: (error) => {
             console.error('Error creating equipment', error);
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create Equipment', life: 3000 });
           }
+        }
         );
       }
 
-      this.equipment = [...this.equipment];
       this.equipmentDialog = false;
       this.initForm();
     }
@@ -170,8 +170,8 @@ export class EquipmentComponent {
 
   findIndexById(id: number): number {
     let index = -1;
-    for (let i = 0; i < this.equipment.length; i++) {
-      if (this.equipment[i].id === id) {
+    for (let i = 0; i < this.equipments.length; i++) {
+      if (this.equipments[i].id === id) {
         index = i;
         break;
       }

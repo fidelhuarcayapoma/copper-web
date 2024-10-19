@@ -21,7 +21,7 @@ import { StatusComponent } from "../../shared/components/status/status.component
     MessageService,
   ],
 })
-export class UsersComponent implements OnInit{
+export class UsersComponent implements OnInit {
   users: User[] = [];
   usersService = inject(UsersService)
   modalService = inject(DialogService); // Inyectar el servicio del modal
@@ -31,25 +31,20 @@ export class UsersComponent implements OnInit{
   isLoading = true;
 
   rows = 10;
-  ngZone = inject(NgZone);
   ngOnInit() {
     this.loadUsers();
-    
-    this.ngZone.run(() => {
-      console.log('Within Angular Zone:', NgZone.isInAngularZone());
-    });
   }
 
   loadUsers() {
     this.usersService.getAll().subscribe({
       next: (res) => {
         this.users = res;
-      this.isLoading = false;
+        this.isLoading = false;
         this.changeDetectorRef.detectChanges();
       },
     });
   }
-  
+
   // Crear un nuevo usuario
   createUser() {
     this.modalRef = this.modalService.open(UserFormComponent, {
@@ -59,12 +54,14 @@ export class UsersComponent implements OnInit{
 
     this.modalRef.onClose.subscribe((result: User) => {
       if (result) {
-        this.users.push(result); // Agregar el nuevo usuario a la lista
+        this.users.push(result);
+        this.users = [...this.users];
+        this.modalRef?.close();
       }
+      this.loadUsers();
     });
   }
 
-  // Editar un usuario existente
   updateUser(user: User) {
     this.modalRef = this.modalService.open(UserFormComponent, {
       data: { user }, // Pasar el usuario existente para editar
@@ -74,36 +71,40 @@ export class UsersComponent implements OnInit{
 
     this.modalRef.onClose.subscribe((result: User) => {
       if (result) {
-        const index = this.users.findIndex(u => u.id === result.id);
-        if (index > -1) {
-          this.users[index] = result; // Actualizar el usuario en la lista
-        }
-      }
+    
+       
+      } this.loadUsers();
     });
   }
 
   next() {
     this.first = this.first + this.rows;
-}
+  }
 
-prev() {
+  prev() {
     this.first = this.first - this.rows;
-}
+  }
 
-reset() {
+  reset() {
     this.first = 0;
-}
+  }
 
-pageChange(event: TablePageEvent) {
+  pageChange(event: TablePageEvent) {
     this.first = event.first;
     this.rows = event.rows;
-}
+  }
 
-isLastPage(): boolean {
+  isLastPage(): boolean {
     return this.users ? this.first === this.users.length - this.rows : true;
-}
+  }
 
-isFirstPage(): boolean {
+  isFirstPage(): boolean {
     return this.users ? this.first === 0 : true;
-}
+  }
+  ngOnDestroy() {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
+  }
+
 }

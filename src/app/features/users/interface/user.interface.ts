@@ -1,10 +1,14 @@
+import { Status } from "../../../shared/interfaces/status.interface";
+
 export interface User {
     id: number;
     name: string;
     lastName: string;
     email: string;
     roles: Role[];
-    createdDate: string;
+    dni: string;
+    status: Status;
+    createdAt: string;
 }
 
 export interface Role {

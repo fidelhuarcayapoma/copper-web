@@ -1,58 +1,90 @@
 <div>
-    <form [formGroup]="userForm" class="form-style" (ngSubmit)="save()">
-      <!-- Nombre -->
-      <div class="form-group">
-        <label for="name">Nombres:</label>
-        <input id="name" pInputText formControlName="name" class="form-control" />
-        <div *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched" class="p-error mt-1">
-          El nombre es requerido.
+  <form [formGroup]="userForm" class="form-style" (ngSubmit)="save()">
+    <!-- DNI -->
+    <div class="form-group">
+      <label for="dni">DNI:</label>
+      <input id="dni" pInputText formControlName="dni" class="form-control" 
+      [class.ng-invalid]="userForm.get('dni')?.invalid && userForm.get('dni')?.touched"
+      [class.ng-dirty]="userForm.get('dni')?.touched"
+      />
+      <div *ngIf="userForm.get('dni')?.invalid && userForm.get('dni')?.touched" class="p-error mt-1">
+        <div *ngIf="userForm.get('dni')?.errors?.['required']">El DNI es requerido.</div>
+        <div *ngIf="userForm.get('dni')?.errors?.['minlength'] || userForm.get('dni')?.errors?.['maxlength']">El DNI
+          debe tener 8 dígitos.</div>
+      </div>
+    </div>
+
+    <!-- Nombre -->
+    <div class="form-group">
+      <label for="name">Nombres:</label>
+      <input id="name" pInputText formControlName="name" class="form-control"
+      [class.ng-invalid]="userForm.get('name')?.invalid && userForm.get('name')?.touched"
+      [class.ng-dirty]="userForm.get('name')?.touched"
+      />
+      <div *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched" class="p-error mt-1">
+        El nombre es requerido.
+      </div>
+    </div>
+
+    <!-- Apellidos en la misma fila -->
+    <div class="form-group-inline">
+      <!-- Primer Apellido -->
+      <div class="form-group-inline-item">
+        <label for="lastName">Apellido paterno:</label>
+        <input id="lastName" pInputText formControlName="lastName" class="form-control" 
+        [class.ng-invalid]="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched"
+        [class.ng-dirty]="userForm.get('lastName')?.touched"/>
+        <div *ngIf="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched" class="p-error mt-1">
+          El primer apellido es requerido.
         </div>
       </div>
-  
-      <!-- Apellidos en la misma fila -->
-      <div class="form-group-inline">
-        <!-- Primer Apellido -->
-        <div class="form-group-inline-item">
-          <label for="lastName">Apellido paterno:</label>
-          <input id="lastName" pInputText formControlName="lastName" class="form-control" />
-          <div *ngIf="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched" class="p-error mt-1">
-            El primer apellido es requerido.
-          </div>
-        </div>
-  
-        <!-- Segundo Apellido -->
-        <div class="form-group-inline-item">
-          <label for="secondLastName">Apellido materno:</label>
-          <input id="secondLastName" pInputText formControlName="secondLastName" class="form-control ng-invalid ng-dirty" />
-          <div *ngIf="userForm.get('secondLastName')?.invalid && userForm.get('secondLastName')?.touched" class="p-error mt-1">
-            El segundo apellido es requerido.
-          </div>
+
+      <!-- Segundo Apellido -->
+      <div class="form-group-inline-item">
+        <label for="secondLastName">Apellido materno:</label>
+        <input id="secondLastName" pInputText formControlName="secondLastName"
+          class="form-control" />
+        <div *ngIf="userForm.get('secondLastName')?.invalid && userForm.get('secondLastName')?.touched"
+          class="p-error mt-1">
+          El segundo apellido es requerido.
         </div>
       </div>
-  
-      <!-- Correo Electrónico -->
-      <div class="form-group mt-3">
-        <label for="email">Correo Electrónico:</label>
-        <input id="email" pInputText formControlName="email" class="form-control ng-invalid ng-dirty" />
-        <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="p-error mt-1">
-          <div *ngIf="userForm.get('email')?.errors?.['required']">El correo es requerido.</div>
-          <div *ngIf="userForm.get('email')?.errors?.['email']">Formato de correo inválido.</div>
-        </div>
+    </div>
+
+    <!-- Correo Electrónico -->
+    <div class="form-group mt-3">
+      <label for="email">Correo Electrónico:</label>
+      <input id="email" pInputText formControlName="email"
+        class="form-control"
+      [class.ng-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched"
+      [class.ng-dirty]="userForm.get('email')?.touched" />
+      <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="p-error mt-1">
+        <div *ngIf="userForm.get('email')?.errors?.['required']">El correo es requerido.</div>
+        <div *ngIf="userForm.get('email')?.errors?.['email']">Formato de correo inválido.</div>
       </div>
-  
-      <!-- Seleccionar Rol -->
-      <div class="form-group">
-        <label for="role">Tipo de usuario:</label>
-        <p-dropdown id="role" [options]="roles" optionLabel="description" formControlName="role" class="ng-invalid ng-dirty"></p-dropdown>
-        <div *ngIf="userForm.get('role')?.invalid && userForm.get('role')?.touched" class="p-error mt-1">
-          El rol es requerido.
-        </div>
+    </div>
+
+    <!-- Seleccionar Rol -->
+    <div class="form-group">
+      <label for="role">Tipo de usuario:</label>
+      <p-dropdown id="role" [options]="roles" optionLabel="description" formControlName="roleId" optionValue="id"
+      [showClear]="true" placeholder="Seleccione un rol"
+      [class.ng-invalid]="userForm.get('roleId')?.invalid && userForm.get('roleId')?.touched"
+      [class.ng-dirty]="userForm.get('roleId')?.touched" appendTo="body"></p-dropdown>
+      <div *ngIf="userForm.get('roleId')?.invalid && userForm.get('roleId')?.touched" class="p-error mt-1">
+        El rol es requerido.
       </div>
-  
-      <!-- Botones de acción -->
-      <div class="button-container">
-        <button pButton type="submit" label="Guardar"></button>
-      </div>
-    </form>
-  </div>
-  
+    </div>
+    <div class="form-group">
+      <label for="status">Estado</label>
+      <p-dropdown [options]="statuses" formControlName="statusId" optionLabel="description" optionValue="id"
+      [showClear]="true" placeholder="Seleccione un Estado" appendTo="body">
+    </p-dropdown>
+      <small class="p-error" *ngIf="userForm.get('statusId')?.invalid">Status is required.</small>
+    </div>
+    <!-- Botones de acción -->
+    <div class="button-container">
+      <button pButton type="submit" label="Guardar"></button>
+    </div>
+  </form>
+</div>

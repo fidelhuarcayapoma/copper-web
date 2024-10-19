@@ -47,7 +47,7 @@ export class CraftComponent implements OnInit {
     this.craftForm = new FormGroup({
       name: new FormControl('', [Validators.required]),
       equipmentId: new FormControl('', [Validators.required]),
-      status: new FormControl('', [Validators.required]),
+      statusId: new FormControl('', [Validators.required]),
     });
   }
 
@@ -118,13 +118,12 @@ export class CraftComponent implements OnInit {
   }
 
   createCraft() {
-    if (!this.craftForm.valid) {
+    if (this.craftForm.invalid) {
       this.submitted = true;
       this.craftForm.markAsDirty();
       return;
     }
     const craft = this.craftForm.getRawValue();
-    console.log('Craft:', craft);
     this.craftService.createCraft(craft).subscribe({
 
       next: () => {
@@ -179,7 +178,11 @@ export class CraftComponent implements OnInit {
   editCraft(craft: Craft) {
     this.isEditing = true;
     this.selectedCraft = craft;
-    this.craftForm.patchValue(craft);
+    this.craftForm.patchValue({
+      ...craft,
+      equipmentId: craft?.equipment?.id,
+      statusId: craft?.status?.id,
+    });
     this.craftDialog = true;
   }
 
@@ -214,6 +217,9 @@ export class CraftComponent implements OnInit {
   openNew() {
     this.resetForm();
     this.craftDialog = true;
+    this.submitted = false;
+    this.selectedCraft = null;
+    this.isEditing = false;
   }
 
   saveCraft() {
@@ -222,7 +228,6 @@ export class CraftComponent implements OnInit {
     } else {
       this.createCraft();
     }
-    this.craftDialog = false;
   }
 
   hideDialog() {

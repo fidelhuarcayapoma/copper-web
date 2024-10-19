@@ -18,6 +18,7 @@
         (onPage)="pageChange($event)" [rowsPerPageOptions]="[10, 25, 50]">
         <ng-template pTemplate="header">
             <tr>
+                <th pSortableColumn="dni">DNI <p-sortIcon field="dni" /></th>
                 <th pSortableColumn="name">Nombres <p-sortIcon field="name" /></th>
                 <th pSortableColumn="email">Correo <p-sortIcon field="email" /></th>
                 <th pSortableColumn="role">Tipo de usuario <p-sortIcon field="role" /></th>
@@ -29,14 +30,15 @@
 
         <ng-template pTemplate="body" let-user>
             <tr>
+                <td>{{ user.dni }}</td>
                 <td>{{ user.fullName }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.roles[0].description }}</td>
+                <td>{{ user?.roles[0].description }}</td>
                 <td><app-status [status]="user.status"></app-status></td>
-                <td>{{ user?.createdDate }}</td>
+                <td>{{ user?.createdAt }}</td>
                 <td>
                     <div class="flex justify-content-end gap-3">
-                        <button pButton (click)="updateUser(user)" icon="pi pi-pencil" class="p-button-text"></button>
+                        <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-primary mr-2"  (click)="updateUser(user)" ></button>
                     </div>
                 </td>
 

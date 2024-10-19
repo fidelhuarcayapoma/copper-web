@@ -1,13 +1,14 @@
 <div class="card">
   <p-toolbar styleClass="mb-4">
     <ng-template pTemplate="left">
-      <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+      <button pButton pRipple label="Nuevo" icon="pi pi-plus" class="p-button-success mr-2"
+        (click)="openNew()"></button>
     </ng-template>
   </p-toolbar>
 
   <p-table #dt [value]="areas" [rows]="10" [paginator]="true"
     [globalFilterFields]="['name','miningUnit.name','status.name']" [rowHover]="true" dataKey="id"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [showCurrentPageReport]="true">
+    currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} entradas" [showCurrentPageReport]="true">
     <ng-template pTemplate="caption">
       <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
         <h5 class="m-0">Administrar Áreas</h5>
@@ -45,26 +46,37 @@
   </p-table>
 </div>
 
-<p-dialog [(visible)]="areaDialog" [style]="{width: '450px'}" header="Area Details" [modal]="true" styleClass="p-fluid">
+<p-dialog [(visible)]="areaDialog" [style]="{width: '450px'}" header="Administrar Áreas" [modal]="true"
+  styleClass="p-fluid">
   <form [formGroup]="areaForm" (ngSubmit)="saveArea()">
     <div class="field">
-      <label for="name">Nombre</label>
+      <label for="name">Nombre:</label>
       <input type="text" pInputText id="name" formControlName="name" required autofocus />
       <small class="p-error" *ngIf="submitted && areaForm.get('name')?.invalid">Name is required.</small>
     </div>
     <div class="field">
-      <label for="miningUnit">Unidad Minera</label>
-      <p-dropdown [options]="miningUnits" formControlName="miningUnit" optionLabel="name" [filter]="true"
-        filterBy="name" [showClear]="true" placeholder="Select a Mining Unit">
+      <label for="miningUnit">Unidad Minera:</label>
+      <p-dropdown [options]="miningUnits" formControlName="miningUnitId" optionLabel="name" optionValue="id" [filter]="true"
+        filterBy="name" [showClear]="true" placeholder="Seleccione una Unidad Minera" appendTo="body">
+        <ng-template let-miningUnit pTemplate="item">
+          <div class="flex align-items-center gap-2">
+            <img src="{{miningUnit.urlLogo}}" style="width: 18px" />
+            <div>{{ miningUnit.name }}</div>
+          </div>
+        </ng-template>
       </p-dropdown>
-      <small class="p-error" *ngIf="submitted && areaForm.get('miningUnit')?.invalid">Mining Unit is required.</small>
+      <small class="p-error" *ngIf="submitted && areaForm.get('miningUnitId')?.invalid">Mining Unit is required.</small>
     </div>
     <div class="field">
-      <label for="status">Estado</label>
-      <p-dropdown [options]="statuses" formControlName="status" optionLabel="name" [filter]="true" filterBy="name"
-        [showClear]="true" placeholder="Select a Status">
+      <label for="status">Estado:</label>
+      <p-dropdown [options]="statuses" formControlName="statusId" optionLabel="description" optionValue="id" [showClear]="true"
+        placeholder="Seleccione un Estado" appendTo="body">
+
+        <ng-template let-option pTemplate="item">
+          <app-status [status]="option"></app-status>
+        </ng-template>
       </p-dropdown>
-      <small class="p-error" *ngIf="submitted && areaForm.get('status')?.invalid">Status is required.</small>
+      <small class="p-error" *ngIf="submitted && areaForm.get('statusId')?.invalid">Status is required.</small>
     </div>
   </form>
   <ng-template pTemplate="footer">
