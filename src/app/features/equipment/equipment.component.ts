@@ -12,6 +12,8 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { StatusService } from '../../shared/service/status.service';
 import { AreaService } from '../area/services/area.service';
 import { Table } from 'primeng/table';
+import { MiningUnitService } from '../mining-unit/services/mining-unit.service';
+import { MiningUnit } from '../mining-unit/interfaces/mining-unit.interface';
 
 @Component({
   selector: 'app-equipment',
@@ -31,6 +33,8 @@ export class EquipmentComponent {
   equipments: Equipment[] = [];
   areas: Area[] = [];
   statuses: Status[] = [];
+  miningUnits: MiningUnit[] = [];
+
   equipmentForm!: FormGroup;
   equipmentDialog: boolean = false;
   submitted: boolean = false;
@@ -40,12 +44,13 @@ export class EquipmentComponent {
     private areaService: AreaService,
     private statusService: StatusService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private miningUnitService: MiningUnitService,
   ) { }
 
   ngOnInit() {
+    this.loadMiningUnits();
     this.loadEquipment();
-    this.loadAreas();
     this.loadStatuses();
     this.initForm();
   }
@@ -53,9 +58,20 @@ export class EquipmentComponent {
   initForm() {
     this.equipmentForm = new FormGroup({
       name: new FormControl(null, [Validators.required]),
+      miningUnitId: new FormControl(null, [Validators.required]),
       areaId: new FormControl(null, [Validators.required]),
       statusId: new FormControl(null, []),
     })
+  }
+  loadMiningUnits() {
+    this.miningUnitService.getMiningUnits().subscribe({
+      next: (data) => {
+        this.miningUnits = data;
+      },
+      error: (error) => {
+        console.error('Error loading mining units', error);
+      }
+    });
   }
 
   loadEquipment() {
@@ -69,16 +85,6 @@ export class EquipmentComponent {
     });
   }
 
-  loadAreas() {
-    this.areaService.getAreas().subscribe(
-      (data) => {
-        this.areas = data;
-      },
-      (error) => {
-        console.error('Error loading areas', error);
-      }
-    );
-  }
 
   loadStatuses() {
     this.statusService.getAll().subscribe({
@@ -181,5 +187,16 @@ export class EquipmentComponent {
 
   onGlobalFilter(table: Table, event: Event) {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+  }
+
+  changeMiningUnit(event: any) {
+    this.areaService.getAreasByMiningUnitId(event.value).subscribe({
+      next:(data) => {
+        this.areas = data;
+      },
+      error:(error) => {
+        console.error('Error loading areas', error);
+      }
+    });
   }
 }

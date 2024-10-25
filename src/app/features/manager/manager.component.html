@@ -1,1 +1,116 @@
-<p>manager works!</p>
+<div class="card">
+    <p-treeTable #tt [value]="files" [columns]="cols" [filterMode]="filterMode" [lazy]="true"
+        (onNodeExpand)="onNodeExpand($event)">
+
+        <ng-template pTemplate="caption">
+            <div class="flex justify-content-between align-items-center">
+                <button pButton label="Nueva Unidad Minera" icon="pi pi-plus" class="p-button-outlined "
+                    (click)="showCreateDialog('miningUnit')">
+                </button>
+                <div class="flex align-items-center">
+                    <button pButton icon="pi pi-refresh" class="p-button-outlined mr-2" (click)="reloadData()">
+                    </button>
+                    <span class="p-input-icon-left">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" placeholder="Buscar..." (input)="onGlobalFilter(tt, $event)" />
+                    </span>
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th *ngFor="let col of columns" [ttSortableColumn]="col.field">
+                    {{ col.header }}
+                    <p-treeTableSortIcon [field]="col.field"></p-treeTableSortIcon>
+                </th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
+            <tr>
+                <td *ngFor="let col of columns">
+                    <ng-container [ngSwitch]="col.field">
+                        <ng-container *ngSwitchCase="'name'">
+                            <span class="flex align-items-center">
+                                <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                                <i [class]="rowData.type | typeIcon" class="mr-2"></i>
+                                {{ rowData[col.field] }}
+                            </span>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'status'">
+                            <app-status [status]="rowData[col.field]"></app-status>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'createdAt'">
+                            {{ rowData[col.field]}}
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'actions'">
+                            <div class="flex">
+                                <ng-container [ngSwitch]="rowData.type">
+                                    <ng-container *ngSwitchCase="'miningUnit'">
+                                        <button pButton icon="pi pi-plus" label="Nueva Área"
+                                            class="p-button-outlined p-button-rounded p-button-text p-button-success mr-2"
+                                            (click)="showCreateDialog('area', rowNode)">
+                                        </button>
+                                    </ng-container>
+                                    <ng-container *ngSwitchCase="'area'">
+                                        <button pButton icon="pi pi-plus" label="Nuevo Equipo"
+                                            class="p-button-outlined p-button-rounded p-button-text p-button-success mr-2"
+                                            (click)="showCreateDialog('equipment', rowNode)">
+                                        </button>
+                                    </ng-container>
+                                    <ng-container *ngSwitchCase="'equipment'">
+                                        <button pButton icon="pi pi-plus" label="Nuevo Manual"
+                                            class="p-button-outlined p-button-rounded p-button-text p-button-success mr-2"
+                                            (click)="showCreateDialog('craft', rowNode)">
+                                        </button>
+                                    </ng-container>
+                                    <ng-container *ngSwitchCase="'craft'">
+                                        <button pButton icon="pi pi-plus" label="Nuevo Documento"
+                                            class="p-button-outlined p-button-rounded p-button-text p-button-success mr-2"
+                                            (click)="showCreateDialog('document', rowNode)">
+                                        </button>
+                                    </ng-container>
+                                    <ng-container *ngSwitchCase="'document'">
+
+                                        <button pButton class="p-button-outlined p-button-rounded p-button-text mr-2"
+                                            icon="pi pi-window-maximize" (click)="openFile(rowData)"></button>
+                                        <button pButton class="p-button-outlined p-button-rounded p-button-text mr-2"
+                                            icon="pi pi-download" (click)="openFile(rowData)"></button>
+                                    </ng-container>
+                                </ng-container>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngSwitchDefault>
+                            {{ rowData[col.field] }}
+                        </ng-container>
+                    </ng-container>
+                </td>
+            </tr>
+        </ng-template>
+    </p-treeTable>
+
+    <!-- Diálogo de creación -->
+    <p-dialog [(visible)]="displayDialog" [header]="'Nuevo ' + currentItemType" [modal]="true"
+        [style]="{width: '450px'}">
+        <div class="p-fluid">
+            <div class="field">
+                <label for="name">Nombre</label>
+                <input id="name" type="text" pInputText required>
+            </div>
+            <div class="field">
+                <label for="status">Estado</label>
+                <p-dropdown id="status"
+                    [options]="[{label: 'Activo', value: 'ACTIVE'}, {label: 'Inactivo', value: 'INACTIVE'}]">
+                </p-dropdown>
+            </div>
+            <!-- Agregar campos adicionales según el tipo de elemento -->
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text"
+                (click)="displayDialog = false"></button>
+            <button pButton label="Guardar" icon="pi pi-check" class="p-button-text" (click)="saveNewItem()"
+                [loading]="loading"></button>
+        </ng-template>
+    </p-dialog>
+</div>

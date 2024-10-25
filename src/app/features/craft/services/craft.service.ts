@@ -8,6 +8,7 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root'
 })
 export class CraftService {
+  
   private apiUrl = environment.msManager + '/crafts';
 
   constructor(private http: HttpClient) { }
@@ -30,5 +31,9 @@ export class CraftService {
 
   deleteCraft(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getCraftsByEquipmentId(id: number) : Observable<Craft[]> {
+    return this.http.get<Craft[]>(`${this.apiUrl}/${id}`);
   }
 }

@@ -10,6 +10,7 @@ import { EquipmentComponent } from './features/equipment/equipment.component';
 import { CraftComponent } from './features/craft/craft.component';
 import { MiningUnitComponent } from './features/mining-unit/mining-unit.component';
 import { DocumentComponent } from './features/document/document.component';
+import { ManagerComponent } from './features/manager/manager.component';
 
 export const routes: Routes = [
   {
@@ -45,6 +46,10 @@ export const routes: Routes = [
       {
         path: 'documents', 
         component: DocumentComponent,
+      },
+      {
+        path: 'manager',
+        component: ManagerComponent,
       }
     ],
   },

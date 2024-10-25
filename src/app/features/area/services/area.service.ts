@@ -8,6 +8,7 @@ import { Area } from '../interfaces/area.interface';
     providedIn: 'root'
 })
 export class AreaService {
+
     http = inject(HttpClient);
 
     getAreas(): Observable<Area[]> {
@@ -28,5 +29,9 @@ export class AreaService {
 
     deleteArea(id: number): Observable<Area> {
         return this.http.delete<Area>(`${environment.msManager}/areas/${id}`);
+    }
+
+    getAreasByMiningUnitId(id: number): Observable<Area[]> {
+        return this.http.get<Area[]>(`${environment.msManager}/areas/${id}`);
     }
 }

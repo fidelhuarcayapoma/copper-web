@@ -13,6 +13,12 @@ import { DocumentService } from './services/document.service';
 import { Document } from './interfaces/document.interface';
 import { UploadComponent } from "../../shared/components/upload/upload.component";
 import { Table } from 'primeng/table';
+import { Area } from '../area/interfaces/area.interface';
+import { Equipment } from '../equipment/interfaces/equipment.interface';
+import { MiningUnit } from '../mining-unit/interfaces/mining-unit.interface';
+import { AreaService } from '../area/services/area.service';
+import { EquipmentService } from '../equipment/service/equipmet.service';
+import { DropdownChangeEvent } from 'primeng/dropdown';
 
 @Component({
   selector: 'app-document',
@@ -33,9 +39,19 @@ import { Table } from 'primeng/table';
   styleUrl: './document.component.scss'
 })
 export class DocumentComponent implements OnInit {
+changeEquipment($event: DropdownChangeEvent) {
+throw new Error('Method not implemented.');
+}
+changeArea($event: DropdownChangeEvent) {
+throw new Error('Method not implemented.');
+}
   documents: Document[] = [];
-  crafts: Craft[] = [];
+  equipments: Equipment[] = [];
+  areas: Area[] = [];
   statuses: Status[] = [];
+  miningUnits: MiningUnit[] = [];
+  crafts: Craft[] = [];
+
   documentForm!: FormGroup;
   selectedDocument: Document | null = null;
 
@@ -47,7 +63,9 @@ export class DocumentComponent implements OnInit {
     private documentService: DocumentService,
     private craftService: CraftService,
     private statusService: StatusService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private equipmentService: EquipmentService,
+    private areaService: AreaService,
   ) {
 
   }
@@ -77,6 +95,23 @@ export class DocumentComponent implements OnInit {
         console.error('Error loading documents', error);
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load documents' });
       }
+    });
+  }
+
+
+  loadEquipments() {
+    this.equipmentService.getAll().subscribe({
+      next: (data) => {
+        this.equipments = data;
+      },
+      error: (error) => {
+        console.error('Error loading equipments', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load equipments',
+        });
+      },
     });
   }
 
@@ -192,5 +227,16 @@ export class DocumentComponent implements OnInit {
       return url.substring(0, 27) + '...';
     }
     return url;
+  }
+
+  changeMiningUnit(event: any) {
+    this.areaService.getAreasByMiningUnitId(event.value).subscribe({
+      next:(data) => {
+        this.areas = data;
+      },
+      error:(error) => {
+        console.error('Error loading areas', error);
+      }
+    });
   }
 }

@@ -57,16 +57,32 @@
       <input type="text" pInputText id="name" formControlName="name" required autofocus />
       <small class="p-error" *ngIf="submitted && equipmentForm?.get('name')?.invalid">Name is required.</small>
     </div>
+
+    <div class="field">
+      <label for="miningUnit">Unidad Minera:</label>
+      <p-dropdown [options]="miningUnits" formControlName="miningUnitId" optionLabel="name" optionValue="id"
+        [filter]="true" (onChange)="changeMiningUnit($event)" filterBy="name" [showClear]="true"
+        placeholder="Seleccione una Unidad Minera" appendTo="body">
+        <ng-template let-miningUnit pTemplate="item">
+          <div class="flex align-items-center gap-2">
+            <img src="{{miningUnit.urlLogo}}" style="width: 18px" />
+            <div>{{ miningUnit.name }}</div>
+          </div>
+        </ng-template>
+      </p-dropdown>
+      <small class="p-error" *ngIf="submitted && equipmentForm.get('miningUnitId')?.invalid">Mining Unit is
+        required.</small>
+    </div>
     <div class="field">
       <label for="area">Área:</label>
-      <p-dropdown [options]="areas" formControlName="areaId" optionLabel="name" optionValue="id" [filter]="true" filterBy="name"
-        [showClear]="true" placeholder="Seleccione una Área" appendTo="body">
+      <p-dropdown [options]="areas" formControlName="areaId" optionLabel="name" optionValue="id" [filter]="true"
+        filterBy="name" [showClear]="true" placeholder="Seleccione una Área" appendTo="body">
       </p-dropdown>
       <small class="p-error" *ngIf="submitted && equipmentForm.get('areaId')?.invalid">Area is required.</small>
     </div>
     <div class="field">
       <label for="status">Estado:</label>
-      <p-dropdown [options]="statuses" formControlName="statusId" optionLabel="description"  optionValue="id"
+      <p-dropdown [options]="statuses" formControlName="statusId" optionLabel="description" optionValue="id"
         [showClear]="true" placeholder="Seleccione un Estado" appendTo="body">
       </p-dropdown>
       <small class="p-error" *ngIf="submitted && equipmentForm.get('statusId')?.invalid">Status is required.</small>

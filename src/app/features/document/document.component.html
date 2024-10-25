@@ -5,17 +5,17 @@
                 (click)="openNew()"></button>
         </ng-template>
     </p-toolbar>
-    <p-table #dt  [value]="documents">
+    <p-table #dt [value]="documents">
         <ng-template pTemplate="caption">
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-              <h5 class="m-0">Administrar Documentos</h5>
-              <span class="block mt-2 md:mt-0 p-input-icon-left">
-                <i class="pi pi-search"></i>
-                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..."
-                  class="w-full sm:w-auto" />
-              </span>
+                <h5 class="m-0">Administrar Documentos</h5>
+                <span class="block mt-2 md:mt-0 p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..."
+                        class="w-full sm:w-auto" />
+                </span>
             </div>
-          </ng-template>
+        </ng-template>
         <ng-template pTemplate="header">
             <tr>
                 <th>Nombre</th>
@@ -42,30 +42,75 @@
     </p-table>
 </div>
 
-<p-dialog [(visible)]="documentDialog" [style]="{width: '450px'}" header="Agregar Documento" [modal]="true" styleClass="p-fluid">
-    <form [formGroup]="documentForm" >
+<p-dialog [(visible)]="documentDialog" [style]="{width: '450px'}" header="Agregar Documento" [modal]="true"
+    styleClass="p-fluid">
+    <form [formGroup]="documentForm">
         <div class="p-fluid p-formgrid p-grid">
             <div class="field p-col-12 p-md-6">
                 <label for="name">Nombre:</label>
                 <input id="name" type="text" pInputText formControlName="name" />
             </div>
+            <div class="field">
+                <label for="miningUnit">Unidad Minera:</label>
+                <p-dropdown [options]="miningUnits" formControlName="miningUnitId" optionLabel="name" optionValue="id"
+                    [filter]="true" filterBy="name" [showClear]="true" placeholder="Seleccione una Unidad Minera"
+                    appendTo="body">
+                    <ng-template let-miningUnit pTemplate="item">
+                        <div class="flex align-items-center gap-2">
+                            <img src="{{miningUnit.urlLogo}}" style="width: 18px" />
+                            <div>{{ miningUnit.name }}</div>
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+                <small class="p-error" *ngIf="submitted && documentForm.get('miningUnitId')?.invalid">Mining Unit is
+                    required.</small>
+            </div>
+
+            <div class="field">
+                <label for="area">Área:</label>
+                <p-dropdown [options]="areas" formControlName="areaId" optionLabel="name" optionValue="id"
+                    [filter]="true" filterBy="name" [showClear]="true" placeholder="Seleccione una Área"
+                    (onChange)="changeArea($event)"
+                    appendTo="body">
+                </p-dropdown>
+                <small class="p-error" *ngIf="submitted && documentForm.get('areaId')?.invalid">Area is
+                    required.</small>
+            </div>
+            <div class="field">
+                <label for="equipment">Equipo:</label>
+                <p-dropdown [options]="equipments" formControlName="equipmentId" optionLabel="name" optionValue="id"
+                    (onChange)="changeEquipment($event)"
+                    [showClear]="true" placeholder="Select Equipment">
+                </p-dropdown>
+                <small class="p-error" *ngIf="submitted && documentForm.get('equipmentId')?.invalid">Equipment is
+                    required.</small>
+            </div>
+
             <div class="field p-col-12 p-md-6">
                 <label for="url">URL:</label>
                 <input id="url" type="text" pInputText formControlName="url" />
             </div>
             <div class="field p-col-12 p-md-6">
                 <label for="craft">Manual:</label>
-                <p-dropdown id="craft" [options]="crafts" optionLabel="name" formControlName="craftId" optionValue="id" appendTo="body"></p-dropdown>
+                <p-dropdown id="craft" [options]="crafts" optionLabel="name" formControlName="craftId" optionValue="id"
+                    appendTo="body"></p-dropdown>
+                <small class="p-error" *ngIf="submitted && documentForm.get('craftId')?.invalid">Craft is
+                    required.</small>
             </div>
             <div class="field p-col-12 p-md-6">
                 <label for="status">Estado:</label>
-                <p-dropdown id="status" [options]="statuses" optionLabel="description" formControlName="statusId" optionValue="id" appendTo="body"></p-dropdown>
+                <p-dropdown id="status" [options]="statuses" optionLabel="description" formControlName="statusId"
+                    optionValue="id" appendTo="body"></p-dropdown>
+                <small class="p-error" *ngIf="submitted && documentForm.get('statusId')?.invalid">Status is
+                    required.</small>
+
             </div>
         </div>
 
     </form>
     <ng-template pTemplate="footer">
-        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
+            (click)="hideDialog()"></button>
         <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" (click)="onSubmit()"></button>
     </ng-template>
 </p-dialog>

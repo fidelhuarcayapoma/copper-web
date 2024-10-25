@@ -8,6 +8,7 @@ import { Document } from '../interfaces/document.interface';
   providedIn: 'root'
 })
 export class DocumentService {
+  
   private apiUrl = environment.msManager + '/documents';
 
   constructor(private http: HttpClient) { }
@@ -30,5 +31,9 @@ export class DocumentService {
 
   deleteDocument(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getDocumentsByCraftId(id: number) : Observable<Document[]> {
+    return this.http.get<Document[]>(`${this.apiUrl}/${id}`);
   }
 }

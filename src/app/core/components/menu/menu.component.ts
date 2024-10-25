@@ -48,6 +48,9 @@ export class MenuComponent implements OnInit {
                         
                     },
                     {
+                        label: 'Administrar', icon: 'pi pi-fw pi-th-large', routerLink: ['/manager'],
+                    },
+                    {
                         label: 'Mantenimientos', icon: 'pi pi-fw pi-building',
                         items: [
                             {

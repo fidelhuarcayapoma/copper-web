@@ -19,7 +19,10 @@
 
         <div class="flex justify-content-center">
             <p-menu #menu [model]="items" [popup]="true" />
-            <p-button icon="pi pi-user" [rounded]="true"   [outlined]="true" (onClick)="menu.toggle($event)"/>
+            <p-avatar pRipple label="{{firstChar}}" styleClass="mr-2" size="large" shape="circle" (click)="menu.toggle($event)"
+            [style]="{ 'background-color': '#dee9fc', color: '#1a2551' }"
+            />
+
         </div>
 
     </div>
