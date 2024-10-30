@@ -8,6 +8,7 @@ import { TablePageEvent } from 'primeng/table';
 import { MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { StatusComponent } from "../../shared/components/status/status.component";
+import { Column } from '../../core/interfaces/column.interface';
 
 @Component({
   selector: 'app-users',
@@ -31,8 +32,18 @@ export class UsersComponent implements OnInit {
   isLoading = true;
 
   rows = 10;
+  columns: Column[] = [];
   ngOnInit() {
     this.loadUsers();
+    this.columns = [
+      { field: 'dni', header: 'DNI', sortable: true },
+      { field: 'name', header: 'Nombres', sortable: true },
+      { field: 'email', header: 'Correo', sortable: true },
+      { field: 'role', header: 'Tipo de usuario', sortable: true },
+      { field: 'status', header: 'Estado', sortable: true },
+      { field: 'created_date', header: 'Fecha de creación', sortable: true },
+      { field: 'actions', header: 'Acciones', sortable: false }
+    ];
   }
 
   loadUsers() {

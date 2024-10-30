@@ -1,5 +1,10 @@
 <div class="card">
-    <p-treeTable #tt [value]="files" [columns]="cols" [filterMode]="filterMode" [lazy]="true"
+    <p-treeTable #tt [value]="files" [columns]="cols" [filterMode]="filterMode" [lazy]="true" [paginator]="true"
+        [rows]="5" [rowsPerPageOptions]="[5, 10, 25]" [scrollable]="false" dataKey="id"
+        currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} entradas"
+        
+        [tableStyle]="{'min-width':'50rem'}" 
+        styleClass="p-treetable-sm"
         (onNodeExpand)="onNodeExpand($event)">
 
         <ng-template pTemplate="caption">
@@ -48,39 +53,66 @@
                             <div class="flex">
                                 <ng-container [ngSwitch]="rowData.type">
                                     <ng-container *ngSwitchCase="'miningUnit'">
-                                        <button pButton icon="pi pi-plus" label="Nueva Área"
+                                        <button pButton icon="pi pi-plus"
                                             class="p-button-outlined p-button-rounded p-button-text p-button-success mr-2"
                                             (click)="showCreateDialog('area', rowNode)">
                                         </button>
+                                        <button pButton icon="pi pi-pencil"
+                                            class="p-button-outlined p-button-rounded p-button-text mr-2"
+                                            (click)="showCreateDialog('miningUnit', rowNode, rowData)"></button>
+                                        <button pButton icon="pi pi-trash"
+                                            class="p-button-outlined p-button-rounded p-button-text p-button-danger mr-2"
+                                            (click)="deleteItem(rowNode)"></button>
                                     </ng-container>
                                     <ng-container *ngSwitchCase="'area'">
-                                        <button pButton icon="pi pi-plus" label="Nuevo Equipo"
+                                        <button pButton icon="pi pi-plus"
                                             class="p-button-outlined p-button-rounded p-button-text p-button-success mr-2"
                                             (click)="showCreateDialog('equipment', rowNode)">
                                         </button>
+                                        <button pButton icon="pi pi-pencil"
+                                            class="p-button-outlined p-button-rounded p-button-text mr-2"
+                                            (click)="showCreateDialog('area', rowNode, rowData)"></button>
+                                        <button pButton icon="pi pi-trash"
+                                            class="p-button-outlined p-button-rounded p-button-text p-button-danger mr-2"
+                                            (click)="deleteItem(rowNode)"></button>
                                     </ng-container>
                                     <ng-container *ngSwitchCase="'equipment'">
-                                        <button pButton icon="pi pi-plus" label="Nuevo Manual"
+                                        <button pButton icon="pi pi-plus"
                                             class="p-button-outlined p-button-rounded p-button-text p-button-success mr-2"
                                             (click)="showCreateDialog('craft', rowNode)">
                                         </button>
+                                        <button pButton icon="pi pi-pencil"
+                                            class="p-button-outlined p-button-rounded p-button-text mr-2"
+                                            (click)="showCreateDialog('equipment', rowNode, rowData)"></button>
+                                        <button pButton icon="pi pi-trash"
+                                            class="p-button-outlined p-button-rounded p-button-text p-button-danger mr-2"
+                                            (click)="deleteItem(rowNode)"></button>
                                     </ng-container>
                                     <ng-container *ngSwitchCase="'craft'">
-                                        <button pButton icon="pi pi-plus" label="Nuevo Documento"
+                                        <button pButton icon="pi pi-plus"
                                             class="p-button-outlined p-button-rounded p-button-text p-button-success mr-2"
                                             (click)="showCreateDialog('document', rowNode)">
                                         </button>
+                                        <button pButton icon="pi pi-pencil"
+                                            class="p-button-outlined p-button-rounded p-button-text mr-2"
+                                            (click)="showCreateDialog('craft', rowNode, rowData)"></button>
+                                        <button pButton icon="pi pi-trash"
+                                            class="p-button-outlined p-button-rounded p-button-text p-button-danger mr-2"
+                                            (click)="deleteItem(rowNode)"></button>
                                     </ng-container>
                                     <ng-container *ngSwitchCase="'document'">
-
                                         <button pButton class="p-button-outlined p-button-rounded p-button-text mr-2"
                                             icon="pi pi-window-maximize" (click)="openFile(rowData)"></button>
                                         <button pButton class="p-button-outlined p-button-rounded p-button-text mr-2"
                                             icon="pi pi-download" (click)="openFile(rowData)"></button>
+                                        <button pButton icon="pi pi-trash"
+                                            class="p-button-outlined p-button-rounded p-button-text p-button-danger mr-2"
+                                            (click)="deleteItem(rowNode)"></button>
                                     </ng-container>
                                 </ng-container>
                             </div>
                         </ng-container>
+
                         <ng-container *ngSwitchDefault>
                             {{ rowData[col.field] }}
                         </ng-container>
@@ -90,27 +122,35 @@
         </ng-template>
     </p-treeTable>
 
-    <!-- Diálogo de creación -->
-    <p-dialog [(visible)]="displayDialog" [header]="'Nuevo ' + currentItemType" [modal]="true"
-        [style]="{width: '450px'}">
-        <div class="p-fluid">
-            <div class="field">
-                <label for="name">Nombre</label>
-                <input id="name" type="text" pInputText required>
-            </div>
-            <div class="field">
-                <label for="status">Estado</label>
-                <p-dropdown id="status"
-                    [options]="[{label: 'Activo', value: 'ACTIVE'}, {label: 'Inactivo', value: 'INACTIVE'}]">
-                </p-dropdown>
-            </div>
-            <!-- Agregar campos adicionales según el tipo de elemento -->
-        </div>
-        <ng-template pTemplate="footer">
-            <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text"
-                (click)="displayDialog = false"></button>
-            <button pButton label="Guardar" icon="pi pi-check" class="p-button-text" (click)="saveNewItem()"
-                [loading]="loading"></button>
-        </ng-template>
+    <p-dialog [(visible)]="displayDialog"
+        [header]="isEditMode ? 'Editar ' +   getCurrentName() : 'Crear ' + getCurrentName()" [modal]="true"
+        [style]="{width: '450px'}" styleClass="p-fluid">
+
+        @switch (currentItemType) {
+        @case ('miningUnit'){
+        <app-mining-unit-form [form]="form" [selectedItem]="newItemData" [miningUnits]="items" [statuses]="statuses"
+            (save)="saveNewItem($event)" (cancel)="onCancel()"></app-mining-unit-form>
+        }
+        @case ('area'){
+        <app-area-form [areaForm]="form" [area]="newItemData" [miningUnits]="items" [statuses]="statuses"
+            (save)="saveNewItem($event)" (cancel)="onCancel()"></app-area-form>
+
+        }
+        @case ('equipment'){
+        <app-equipment-form [form]="form" [equipment]="newItemData" [areas]="items" [statuses]="statuses"
+            (save)="saveNewItem($event)" (cancel)="onCancel()"></app-equipment-form>
+        }
+        @case ('craft'){
+        <app-craft-form [form]="form" [craft]="newItemData" [equipments]="items" [statuses]="statuses"
+            (save)="saveNewItem($event)" (cancel)="onCancel()"></app-craft-form>
+        }
+        @case ('document'){
+        <app-document-form [form]="form" [document]="newItemData" [crafts]="items" [statuses]="statuses"
+            (save)="saveNewItem($event)" (cancel)="onCancel()"></app-document-form>
+        }
+        }
     </p-dialog>
 </div>
+
+
+<p-toast></p-toast>

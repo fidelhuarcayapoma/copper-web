@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { PRIMENG_MODULES } from '../../primeng.imports';
 import { TreeTable, TreeTableModule } from 'primeng/treetable';
-import { MessageService, TreeNode } from 'primeng/api';
+import { MessageService, TreeNode, TreeTableNode } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { Area } from '../area/interfaces/area.interface';
 import { Craft } from '../craft/interfaces/craft.interface';
@@ -16,17 +16,32 @@ import { switchMap, forkJoin, map, Observable } from 'rxjs';
 import { AreaService } from '../area/services/area.service';
 import { StatusComponent } from '../../shared/components/status/status.component';
 import { TypeIconPipe } from '../../shared/pipes/type-icon.pipe';
+import { AreaFormComponent } from '../area/components/area-form/area-form.component';
+import { MiningUnitFormComponent } from '../mining-unit/components/mining-unit-form/mining-unit-form.component';
+import { DocumentFormComponent } from '../document/components/document-form/document-form.component';
+import { EquipmentFormComponent } from '../equipment/components/equipment-form/equipment-form.component';
+import { CraftFormComponent } from '../craft/components/craft-form/craft-form.component';
+import { DialogModule } from 'primeng/dialog';
+import { Status } from '../../shared/interfaces/status.interface';
+import { FormGroup, UntypedFormGroup } from '@angular/forms';
+import { StatusService } from '../../shared/service/status.service';
 
 
 @Component({
   selector: 'app-manager',
   standalone: true,
   imports: [
-    ...PRIMENG_MODULES,
+    DialogModule,
     TreeTableModule,
     CommonModule,
+    ...PRIMENG_MODULES,
     StatusComponent,
     TypeIconPipe,
+    AreaFormComponent,
+    MiningUnitFormComponent,
+    DocumentFormComponent,
+    EquipmentFormComponent,
+    CraftFormComponent,
   ],
   providers: [
     MessageService,
@@ -40,8 +55,9 @@ export class ManagerComponent implements OnInit {
   private equipmentService = inject(EquipmentService);
   private craftService = inject(CraftService);
   private documentService = inject(DocumentService);
+  private statusService = inject(StatusService);
   private cd = inject(ChangeDetectorRef);
-  private messageService = inject(MessageService); // Para mostrar mensajes de éxito/error
+  private messageService = inject(MessageService);
 
   files: TreeNode[] = [];
   cols: any[] = [];
@@ -51,6 +67,11 @@ export class ManagerComponent implements OnInit {
   newItemData: any = {};
   currentItemType: string = '';
   parentNode: TreeNode | null = null;
+  items: any[] = [];
+  statuses: Status[] = [];
+  form: FormGroup = new UntypedFormGroup({});
+  editItemData: any = {};
+  isEditMode: boolean = false;
 
   ngOnInit() {
     this.cols = [
@@ -63,110 +84,142 @@ export class ManagerComponent implements OnInit {
     this.loadInitialData();
   }
 
-  showCreateDialog(type: string, parent?: TreeNode) {
+  showCreateDialog(type: string, parent?: TreeTableNode, itemData?: any) {
     this.currentItemType = type;
-    this.parentNode = parent || null;
-    this.newItemData = {
-      name: '',
-      status: 'ACTIVE',
-      miningUnitId: this.parentNode?.data?.id ?? null  // Verifica que `data` esté presente
-    };
-    
+    this.parentNode = parent?.node || null;
+    this.isEditMode = !!itemData;
+    this.loadStatuses();
+    this.form.reset();
+    this.newItemData = itemData || {};
+
     this.displayDialog = true;
+
+    switch (type) {
+      case 'area':
+        this.miningUnitService
+          .getMiningUnits()
+          .subscribe((res) => {
+            this.items = res;
+          })
+        break;
+      case 'miningUnit':
+        break;
+      case 'equipment':console.log(this.parentNode?.data);
+        this.areaService
+          .getAreas()
+          .subscribe((res) => {
+            this.items = res;
+          })
+        break;
+      case 'craft':
+        this.equipmentService
+          .getAll()
+          .subscribe((res) => {
+            this.items = res;
+          })
+        break;
+      case 'document':
+        this.craftService
+          .getCrafts()
+          .subscribe((res) => {
+            this.items = res;
+          })
+        break;
+    }
+
   }
 
-  // Método para guardar el nuevo elemento
-  saveNewItem() {
-    if (!this.newItemData.name) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'El nombre es requerido'
-      });
-      return;
-    }
+  saveNewItem(form: FormGroup) {
+    const value = form.getRawValue();
 
     this.loading = true;
     let saveOperation: Observable<any>;
 
-    switch (this.currentItemType) {
-      case 'miningUnit':
-        saveOperation = this.miningUnitService.createMiningUnit(this.newItemData);
-        break;
-      case 'area':
-        this.newItemData.miningUnitId = this.parentNode?.data.id;
-        saveOperation = this.areaService.createArea(this.newItemData);
-        break;
-      case 'equipment':
-        this.newItemData.areaId = this.parentNode?.data.id;
-        saveOperation = this.equipmentService.createEquipment(this.newItemData);
-        break;
-      case 'craft':
-        this.newItemData.equipmentId = this.parentNode?.data.id;
-        saveOperation = this.craftService.createCraft(this.newItemData);
-        break;
-      case 'document':
-        this.newItemData.craftId = this.parentNode?.data.id;
-        saveOperation = this.documentService.createDocument(this.newItemData);
-        break;
-      default:
-        this.loading = false;
-        return;
+    if (this.isEditMode) {
+      saveOperation = this.updateItem(value);
+    } else {
+      saveOperation = this.createNewItem(value);
     }
-
     saveOperation.subscribe({
       next: (result) => {
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
-          detail: 'Elemento creado correctamente'
+          detail: this.isEditMode ? 'Elemento actualizado correctamente' : 'Elemento creado correctamente'
         });
         this.displayDialog = false;
         this.loading = false;
-        
-        // Recargar los datos del nodo padre si existe
-        if (this.parentNode) {
-          this.onNodeExpand({ node: this.parentNode });
-        } else {
-          this.loadInitialData();
-        }
+        this.reloadData();
       },
-      error: (error) => {
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Error al crear el elemento'
+          detail: 'Ocurrió un error al guardar el elemento'
         });
         this.loading = false;
       }
     });
   }
 
-  // Método para renderizar acciones según el tipo
-  renderActions(rowData: any): string {
-    let actions = '';
-    
-    switch (rowData.type) {
-      case 'miningUnit':
-        actions += `<button pButton icon="pi pi-plus" class="p-button-outlined p-button-success mr-2" 
-                    (click)="showCreateDialog('area', node)"></button>`;
-        break;
-      case 'area':
-        actions += `<button pButton icon="pi pi-plus" class="p-button-outlined p-button-success mr-2" 
-                    (click)="showCreateDialog('equipment', node)"></button>`;
-        break;
-      case 'equipment':
-        actions += `<button pButton icon="pi pi-plus" class="p-button-outlined p-button-success mr-2" 
-                    (click)="showCreateDialog('craft', node)"></button>`;
-        break;
-      case 'craft':
-        actions += `<button pButton icon="pi pi-plus" class="p-button-outlined p-button-success mr-2" 
-                    (click)="showCreateDialog('document', node)"></button>`;
-        break;
+  private createNewItem(data: any): Observable<any> {
+    switch (this.currentItemType) {
+      case 'miningUnit': return this.miningUnitService.createMiningUnit(data);
+      case 'area': return this.areaService.createArea(data);
+      case 'equipment': return this.equipmentService.createEquipment(data);
+      case 'craft': return this.craftService.createCraft(data);
+      case 'document': return this.documentService.createDocument(data);
+      default: throw new Error('Tipo de elemento desconocido');
     }
-    
-    return actions;
   }
+
+  private updateItem(data: any): Observable<any> {
+    const id = this.newItemData?.id;
+    if (!id) {
+      throw new Error('El elemento no tiene un ID');
+    }
+    data.id = id;
+
+    switch (this.currentItemType) {
+      case 'miningUnit': return this.miningUnitService.updateMiningUnit(id, data);
+      case 'area': return this.areaService.updateArea(id, data);
+      case 'equipment': return this.equipmentService.updateEquipment(id, data);
+      case 'craft': return this.craftService.updateCraft(data);
+      case 'document': return this.documentService.updateDocument(data);
+      default: throw new Error('Tipo de elemento desconocido');
+    }
+  }
+
+  deleteItem(item: TreeTableNode) {
+    let deleteOperation: Observable<any>;
+    console.log(item.node);
+    const id = item.node?.data?.id;
+
+    if (!id) {
+      throw new Error('El elemento no tiene un ID');
+    }
+
+    switch (item.node?.data.type) {
+      case 'miningUnit': deleteOperation = this.miningUnitService.deleteMiningUnit(id); break;
+      case 'area': deleteOperation = this.areaService.deleteArea(id); break;
+      case 'equipment': deleteOperation = this.equipmentService.deleteEquipment(id); break;
+      case 'craft': deleteOperation = this.craftService.deleteCraft(id); break;
+      case 'document': deleteOperation = this.documentService.deleteDocument(id); break;
+      default: throw new Error('Tipo de elemento desconocido');
+    }
+
+    deleteOperation.subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Elemento eliminado correctamente' });
+        this.reloadData();
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al eliminar el elemento' });
+      }
+    });
+  }
+
+
   loadInitialData() {
     this.loading = true;
     this.miningUnitService.getMiningUnits().subscribe({
@@ -177,11 +230,8 @@ export class ManagerComponent implements OnInit {
           }
 
           this.files = miningUnits.map(unit => this.createTreeNode({
-            name: unit.name || 'Sin nombre',
-            status: unit.status || 'INACTIVE',
-            createdAt: unit.createdAt || new Date(),
+            ...unit,
             type: 'miningUnit',
-            id: unit.id || ''
           }, false));
 
           this.loading = false;
@@ -210,7 +260,6 @@ export class ManagerComponent implements OnInit {
     });
   }
 
-  // Método auxiliar para crear nodos del árbol
   private createTreeNode(data: any, isLeaf: boolean): TreeNode {
     return {
       data: data,
@@ -223,7 +272,6 @@ export class ManagerComponent implements OnInit {
     };
   }
 
-  // Método para obtener el ícono según el tipo de nodo
   private getNodeIcon(type: string): string {
     switch (type) {
       case 'miningUnit':
@@ -252,7 +300,7 @@ export class ManagerComponent implements OnInit {
 
     if (!node.children || !node.children.length) {
       this.loading = true;
-  
+
       switch (node.data.type) {
         case 'miningUnit':
           this.loadAreas(node);
@@ -271,7 +319,18 @@ export class ManagerComponent implements OnInit {
       }
     }
   }
-  
+
+  getCurrentName() {
+    switch (this.currentItemType) {
+      case 'miningUnit': return 'Unidad minera';
+      case 'area': return 'Área';
+      case 'equipment': return 'Equipo';
+      case 'craft': return 'Manual';
+      case 'document': return 'Documento';
+      default: return 'Tipo de elemento desconocido';
+    }
+  }
+
 
   private loadAreas(node: TreeNode) {
     this.areaService.getAreasByMiningUnitId(node.data.id).subscribe({
@@ -279,10 +338,8 @@ export class ManagerComponent implements OnInit {
         node.children = areas.map(area => {
           const childNode = {
             data: {
-              name: area.name,
-              status: area.status,
-              type: 'area',
-              id: area.id
+              ...area,
+              type: 'area'
             },
             leaf: false // No es hoja inicialmente
           };
@@ -304,11 +361,8 @@ export class ManagerComponent implements OnInit {
       next: (equipments) => {
         node.children = equipments.map(equipment => ({
           data: {
-            name: equipment.name,
-            status: equipment.status,
-            createdAt: equipment.createdAt,
+            ...equipment,
             type: 'equipment',
-            id: equipment.id
           },
           leaf: false
         }));
@@ -328,11 +382,8 @@ export class ManagerComponent implements OnInit {
       next: (crafts) => {
         node.children = crafts.map(craft => ({
           data: {
-            name: craft.name,
-            status: craft.status,
-            createdAt: craft.createdAt,
+            ...craft,
             type: 'craft',
-            id: craft.id
           },
           leaf: false
         }));
@@ -352,12 +403,8 @@ export class ManagerComponent implements OnInit {
       next: (documents) => {
         node.children = documents.map(doc => ({
           data: {
-            name: doc.name,
-            status: doc.status,
-            createdAt: doc.createdAt,
+            ...doc,
             type: 'document',
-            id: doc.id,
-            url: doc.url
           },
           leaf: true
         }));
@@ -368,6 +415,19 @@ export class ManagerComponent implements OnInit {
       error: (error) => {
         this.loading = false;
         this.cd.markForCheck();
+      }
+    });
+  }
+  loadStatuses() {
+    if (this.statuses.length !== 0) {
+      return;
+    }
+    this.statusService.getAll().subscribe({
+      next: (data) => {
+        this.statuses = data;
+      },
+      error: (error) => {
+        console.error('Error loading statuses', error);
       }
     });
   }
@@ -382,8 +442,12 @@ export class ManagerComponent implements OnInit {
     }
   }
 
+  onCancel() {
+    this.displayDialog = false; console.log(this.form.getRawValue());
+  }
+
   reloadData() {
     this.loadInitialData();
   }
-  
+
 }

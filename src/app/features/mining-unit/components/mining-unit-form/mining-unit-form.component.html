@@ -1,0 +1,27 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="field mb-4">
+        <label for="name">Nombre</label>
+        <input type="text" pInputText id="name" formControlName="name" required autofocus />
+        <small class="p-error" *ngIf="submitted && form.get('name')?.invalid">Name is required.</small>
+    </div>
+
+    <div class="field">
+        <label for="urlLogo">URL Logo</label>
+        <textarea pInputTextarea id="urlLogo" formControlName="urlLogo" rows="2" cols="20"></textarea>
+    </div>
+
+    <div class="field">
+        <label for="status">Estado</label>
+        <p-dropdown [options]="statuses" formControlName="statusId" optionLabel="description" optionValue="id"
+            [showClear]="true" placeholder="Seleccione un Estado" appendTo="body">
+        </p-dropdown>
+        <small class="p-error" *ngIf="submitted && form.get('statusId')?.invalid">Status is required.</small>
+    </div>
+    <div class="flex align-items-end  justify-content-end mt-4">
+        <button pButton label="Cancelar" icon="pi pi-times" class="p-button-text mr-2" type="button"
+            (click)="onCancel()">
+        </button>
+        <button pButton label="Guardar" icon="pi pi-check" class="p-button-text" type="submit">
+        </button>
+    </div>
+</form>

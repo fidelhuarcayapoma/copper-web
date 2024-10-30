@@ -102,8 +102,7 @@ export class MiningUnitComponent  implements OnInit{
 
   editMiningUnit(miningUnit: MiningUnit) {
     this.miningUnitForm.patchValue({
-      ...miningUnit,
-      statusId: miningUnit.status?.id
+      ...miningUnit
     });
     this.miningUnitDialog = true;
     this.selectedMiningUnit = miningUnit;

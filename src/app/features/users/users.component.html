@@ -10,40 +10,39 @@
             <p-button label="Nuevo" [rounded]="true" (click)="createUser()" icon="pi pi-plus"></p-button>
         </div>
     </div>
-    
-    
+
+
 
     <p-table [value]="users" [paginator]="true" [rows]="5" [first]="first" [showCurrentPageReport]="true"
-        [tableStyle]="{ 'min-width': '50rem' }" currentPageReportTemplate="{first} a {last} de {totalRecords}"
-        (onPage)="pageChange($event)" [rowsPerPageOptions]="[10, 25, 50]">
+        currentPageReportTemplate="{first} a {last} de {totalRecords}" responsiveLayout="stack" [breakpoint]="'670px'"  [responsive]="true"
+       (onPage)="pageChange($event)" [rowsPerPageOptions]="[10, 25, 50]">
+
+        <!-- Cabecera de la tabla -->
         <ng-template pTemplate="header">
             <tr>
-                <th pSortableColumn="dni">DNI <p-sortIcon field="dni" /></th>
-                <th pSortableColumn="name">Nombres <p-sortIcon field="name" /></th>
-                <th pSortableColumn="email">Correo <p-sortIcon field="email" /></th>
-                <th pSortableColumn="role">Tipo de usuario <p-sortIcon field="role" /></th>
-                <th pSortableColumn="status">Estado <p-sortIcon field="status" /></th>
-                <th pSortableColumn="created_date">Fecha de creación <p-sortIcon field="created_date" /></th>
-                <th>Acciones</th>
+                <th *ngFor="let col of columns" [pSortableColumn]="col.sortable ? col.field : ''">
+                    {{ col.header }}
+                    <p-sortIcon *ngIf="col.sortable" [field]="col.field"></p-sortIcon>
+                </th>
             </tr>
         </ng-template>
 
+        <!-- Cuerpo de la tabla -->
         <ng-template pTemplate="body" let-user>
             <tr>
-                <td>{{ user.dni }}</td>
-                <td>{{ user.fullName }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user?.roles[0].description }}</td>
-                <td><app-status [status]="user.status"></app-status></td>
-                <td>{{ user?.createdAt }}</td>
-                <td>
-                    <div class="flex justify-content-end gap-3">
-                        <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-primary mr-2"  (click)="updateUser(user)" ></button>
-                    </div>
+                <td> <span class="p-column-title">DNI:</span> {{ user.dni }}</td>
+                <td><span class="p-column-title">Nombres:</span>{{ user.fullName }}</td>
+                <td><span class="p-column-title">Correo:</span>{{ user.email }}</td>
+                <td><span class="p-column-title">Descripción:</span>{{ user?.roles[0]?.description }}</td>
+                <td><span class="p-column-title">Estado:</span><app-status [status]="user.status"></app-status></td>
+                <td><span class="p-column-title">Fecha Creación:</span>{{ user?.createdAt }}</td>
+                <td><span class="p-column-title">Acciones:</span>
+                        <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-primary mr-2"
+                            (click)="updateUser(user)"></button>
                 </td>
-
             </tr>
         </ng-template>
     </p-table>
+
 
 </div>

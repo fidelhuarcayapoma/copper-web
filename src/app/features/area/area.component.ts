@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } 
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { MiningUnit } from '../mining-unit/interfaces/mining-unit.interface';
 import { Status } from '../../shared/interfaces/status.interface';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { StatusService } from '../../shared/service/status.service';
 import { MiningUnitService } from '../mining-unit/services/mining-unit.service';
 import { Area } from './interfaces/area.interface';
@@ -13,6 +13,8 @@ import { CommonModule } from '@angular/common';
 import { ToolbarModule } from 'primeng/toolbar';
 import { StatusComponent } from '../../shared/components/status/status.component';
 import { Table } from 'primeng/table';
+import { CrudComponent } from '../../core/components/crud/crud';
+import { AreaFormComponent } from './components/area-form/area-form.component';
 
 @Component({
   selector: 'app-area',
@@ -23,166 +25,105 @@ import { Table } from 'primeng/table';
     ToolbarModule,
     ReactiveFormsModule,
     StatusComponent,
+    AreaFormComponent,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './area.component.html',
   styleUrls: ['./area.component.scss']
 })
-export class AreaComponent implements OnInit {
-  areas: Area[] = [];
+export class AreaComponent extends CrudComponent<Area> implements OnInit {
   miningUnits: MiningUnit[] = [];
   statuses: Status[] = [];
-  areaForm!: FormGroup;
-  areaDialog: boolean = false;
-  submitted: boolean = false;
 
-  selectedArea: Area | null = null;
+  private areaService = inject(AreaService);
+  private miningUnitService = inject(MiningUnitService);
+  private statusService = inject(StatusService);
 
-  constructor(
-    private areaService: AreaService,
-    private miningUnitService: MiningUnitService,
-    private statusService: StatusService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) { }
+  constructor() {
+    super(inject(MessageService), inject(ConfirmationService));
+  }
 
-  ngOnInit() {
-    this.loadAreas();
+  override ngOnInit() {
+    super.ngOnInit();
     this.loadMiningUnits();
     this.loadStatuses();
-    this.initForm();
   }
 
-  initForm() {
-    this.areaForm = new FormGroup({
-      name: new FormControl(null, [Validators.required]),
-      miningUnitId: new FormControl(null, [Validators.required]),
-      statusId: new FormControl(null, [Validators.required]),
-    });
-  }
-
-  loadAreas() {
+  loadItems() {
     this.areaService.getAreas().subscribe({
       next: (data) => {
-        this.areas = data;
+        this.items = data;
       },
       error: (error) => {
         console.error('Error loading areas', error);
+        this.showErrorMessage('Error al cargar las áreas');
       }
     });
   }
 
-  loadMiningUnits() {
+  private loadMiningUnits() {
     this.miningUnitService.getMiningUnits().subscribe({
-      next: (data) => {
-        this.miningUnits = data;
-      },
+      next: (data) => this.miningUnits = data,
       error: (error) => {
         console.error('Error loading mining units', error);
+        this.showErrorMessage('Error al cargar las unidades mineras');
       }
     });
   }
 
-  loadStatuses() {
+  private loadStatuses() {
     this.statusService.getAll().subscribe({
-      next: (data) => {
-        this.statuses = data;
-      },
+      next: (data) => this.statuses = data,
       error: (error) => {
         console.error('Error loading statuses', error);
-      }
-    });
-  }
-
-  openNew() {
-    this.submitted = false;
-    this.areaDialog = true;
-    this.selectedArea = null;
-  }
-
-  deleteArea(area: Area) {
-    this.confirmationService.confirm({
-      message: '¿Estás seguro que deseas eliminar esta área?',
-      header: 'Confirmar',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.areaService.deleteArea(area.id).subscribe({
-          next: () => {
-            this.areas = this.areas.filter(val => val.id !== area.id);
-            this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Área Eliminada', life: 3000 });
-          },
-          error: (error) => {
-            console.error('Error deleting area', error);
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete Area', life: 3000 });
-          }
-        });
+        this.showErrorMessage('Error al cargar los estados');
       }
     });
   }
 
   editArea(area: Area) {
-    this.selectedArea = area;
-    this.areaForm.patchValue({
-      ...area,
-      miningUnitId: area?.miningUnit?.id,
-      statusId: area?.status?.id
+    this.selectedItem = area;
+    this.dialogVisible = true;
+  }
+
+  saveArea(areaData: any) {
+    if (this.selectedItem?.id) {
+      this.areaService.updateArea(this.selectedItem.id, areaData).subscribe({
+        next: () => {
+          this.loadItems();
+          this.showSuccessMessage('Área Actualizada');
+          this.hideDialog();
+        },
+        error: (error) => {
+          console.error('Error updating area', error);
+          this.showErrorMessage('Error al actualizar el área');
+        }
+      });
+    } else {
+      this.areaService.createArea(areaData).subscribe({
+        next: () => {
+          this.loadItems();
+          this.showSuccessMessage('Área Creada');
+          this.hideDialog();
+        },
+        error: (error) => {
+          console.error('Error creating area', error);
+          this.showErrorMessage('Error al crear el área');
+        }
+      });
+    }
+  }
+
+  deleteItem(id: number) {
+    this.areaService.deleteArea(id).subscribe({
+      next: () => {
+        this.loadItems();
+        this.showSuccessMessage('Área Eliminada');
+      },
+      error: (error) => {
+        console.error('Error deleting area', error);
+        this.showErrorMessage('Error al eliminar el área');
+      }
     });
-    this.areaDialog = true;
-  }
-
-  hideDialog() {
-    this.areaDialog = false;
-    this.submitted = false;
-    this.initForm();
-  }
-
-  saveArea() {
-    this.submitted = true;
-
-    if (this.areaForm.valid) {
-      const areaData = this.areaForm.value;
-      if (this.selectedArea?.id) {
-        this.areaService.updateArea(this.selectedArea.id, areaData).subscribe(
-          (result) => {
-            this.loadAreas();
-            this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Area Updated', life: 3000 });
-          },
-          (error) => {
-            console.error('Error updating area', error);
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update Area', life: 3000 });
-          }
-        );
-      } else {
-        this.areaService.createArea(areaData).subscribe(
-          (result) => {
-            this.loadAreas();
-            this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Area Created', life: 3000 });
-          },
-          (error) => {
-            console.error('Error creating area', error);
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create Area', life: 3000 });
-          }
-        );
-      }
-
-
-      this.areaDialog = false;
-      this.initForm();
-    }
-  }
-
-  findIndexById(id: number): number {
-    let index = -1;
-    for (let i = 0; i < this.areas.length; i++) {
-      if (this.areas[i].id === id) {
-        index = i;
-        break;
-      }
-    }
-    return index;
-  }
-
-  onGlobalFilter(table: Table, event: Event) {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 }

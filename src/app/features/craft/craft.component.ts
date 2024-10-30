@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -13,6 +13,10 @@ import { EquipmentService } from '../equipment/service/equipmet.service';
 import { Craft } from './interfaces/craft.interface';
 import { CraftService } from './services/craft.service';
 import { Table } from 'primeng/table';
+import { CrudComponent } from '../../core/components/crud/crud';
+import { AreaService } from '../area/services/area.service';
+import { MiningUnitService } from '../mining-unit/services/mining-unit.service';
+import { CraftFormComponent } from './components/craft-form/craft-form.component';
 
 @Component({
   selector: 'app-craft',
@@ -23,218 +27,105 @@ import { Table } from 'primeng/table';
     ToolbarModule,
     ReactiveFormsModule,
     StatusComponent,
+    CraftFormComponent,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './craft.component.html',
   styleUrls: ['./craft.component.scss'],
 })
-export class CraftComponent implements OnInit {
-  crafts: Craft[] = [];
+export class CraftComponent extends CrudComponent<Craft> implements OnInit {
   equipments: Equipment[] = [];
   statuses: Status[] = [];
-  craftForm: FormGroup;
-  isEditing = false;
-  selectedCraft: Craft | null = null;
-  submitted = false;
-  craftDialog: boolean = false;
 
-  constructor(
-    private craftService: CraftService,
-    private equipmentService: EquipmentService,
-    private statusService: StatusService,
-    private messageService: MessageService
-  ) {
-    this.craftForm = new FormGroup({
-      name: new FormControl('', [Validators.required]),
-      equipmentId: new FormControl('', [Validators.required]),
-      statusId: new FormControl('', [Validators.required]),
-    });
+  private craftService = inject(CraftService);
+  private equipmentService = inject(EquipmentService);
+  private statusService = inject(StatusService);
+
+  constructor() {
+    super(inject(MessageService), inject(ConfirmationService));
   }
 
-  ngOnInit() {
-    this.loadCrafts();
+  override ngOnInit() {
+    super.ngOnInit();
     this.loadEquipments();
     this.loadStatuses();
   }
 
-  loadCrafts() {
+  loadItems() {
     this.craftService.getCrafts().subscribe({
       next: (data) => {
-        this.crafts = data;
+        this.items = data;
       },
       error: (error) => {
         console.error('Error loading crafts', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load crafts',
-        });
-      },
+        this.showErrorMessage('Error al cargar los manuales');
+      }
     });
   }
 
-  loadEquipments() {
+  private loadEquipments() {
     this.equipmentService.getAll().subscribe({
-      next: (data) => {
-        this.equipments = data;
-      },
+      next: (data) => this.equipments = data,
       error: (error) => {
         console.error('Error loading equipments', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load equipments',
-        });
-      },
+        this.showErrorMessage('Error al cargar los equipos');
+      }
     });
   }
 
-  loadStatuses() {
+  private loadStatuses() {
     this.statusService.getAll().subscribe({
-      next: (data) => {
-        this.statuses = data;
-      },
+      next: (data) => this.statuses = data,
       error: (error) => {
         console.error('Error loading statuses', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load statuses',
-        });
-      },
-    });
-  }
-
-  onSubmit() {
-    if (this.craftForm.valid) {
-      this.saveCraft();
-    } else {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Please fill all required fields',
-      });
-    }
-  }
-
-  createCraft() {
-    if (this.craftForm.invalid) {
-      this.submitted = true;
-      this.craftForm.markAsDirty();
-      return;
-    }
-    const craft = this.craftForm.getRawValue();
-    this.craftService.createCraft(craft).subscribe({
-
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Craft created successfully',
-        });
-        this.loadCrafts();
-        this.resetForm();
-      },
-      error: (error) => {
-        console.error('Error creating craft', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to create craft',
-        });
-      },
-    });
-  }
-
-  updateCraft() {
-    if (!this.selectedCraft) return;
-    if (!this.craftForm.valid) {
-      this.submitted = true;
-      this.craftForm.markAsDirty();
-      return;
-    }
-    const updatedCraft = { ...this.selectedCraft, ...this.craftForm.value };
-    this.craftService.updateCraft(updatedCraft).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Craft updated successfully',
-        });
-        this.loadCrafts();
-        this.resetForm();
-      },
-      error: (error) => {
-        console.error('Error updating craft', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to update craft',
-        });
-      },
+        this.showErrorMessage('Error al cargar los estados');
+      }
     });
   }
 
   editCraft(craft: Craft) {
-    this.isEditing = true;
-    this.selectedCraft = craft;
-    this.craftForm.patchValue({
-      ...craft,
-      equipmentId: craft?.equipment?.id,
-      statusId: craft?.status?.id,
-    });
-    this.craftDialog = true;
+    this.selectedItem = craft;
+    this.dialogVisible = true;
   }
 
-  deleteCraft(id: number) {
-    this.craftService.deleteCraft(id).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Craft deleted successfully',
-        });
-        this.loadCrafts();
-      },
-      error: (error) => {
-        console.error('Error deleting craft', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to delete craft',
-        });
-      },
-    });
-  }
-
-  resetForm() {
-    this.isEditing = false;
-    this.selectedCraft = null;
-    this.craftForm.reset();
-    this.craftDialog = false;
-  }
-
-  openNew() {
-    this.resetForm();
-    this.craftDialog = true;
-    this.submitted = false;
-    this.selectedCraft = null;
-    this.isEditing = false;
-  }
-
-  saveCraft() {
-    if (this.isEditing) {
-      this.updateCraft();
+  saveCraft(craftData: any) {
+    if (this.selectedItem?.id) {
+      this.craftService.updateCraft({ ...this.selectedItem, ...craftData }).subscribe({
+        next: () => {
+          this.loadItems();
+          this.showSuccessMessage('Manual Actualizado');
+          this.hideDialog();
+        },
+        error: (error) => {
+          console.error('Error updating craft', error);
+          this.showErrorMessage('Error al actualizar el manual');
+        }
+      });
     } else {
-      this.createCraft();
+      this.craftService.createCraft(craftData).subscribe({
+        next: () => {
+          this.loadItems();
+          this.showSuccessMessage('Manual Creado');
+          this.hideDialog();
+        },
+        error: (error) => {
+          console.error('Error creating craft', error);
+          this.showErrorMessage('Error al crear el manual');
+        }
+      });
     }
   }
 
-  hideDialog() {
-    this.craftDialog = false;
-  }
-
-  onGlobalFilter(table: Table, event: Event) {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+  deleteItem(id: number) {
+    this.craftService.deleteCraft(id).subscribe({
+      next: () => {
+        this.loadItems();
+        this.showSuccessMessage('Manual Eliminado');
+      },
+      error: (error) => {
+        console.error('Error deleting craft', error);
+        this.showErrorMessage('Error al eliminar el manual');
+      }
+    });
   }
 }
