@@ -1,22 +1,16 @@
-<p-toast />
-
-<div class="p-card p-4">
-
-    <div class="flex justify-content-between align-items-center mb-5 mt-4">
-        <div class="text-justify">
+<p-toast></p-toast>
+<div class="p-card p-4 w-full sm:w-auto">
+    <div class="flex flex-wrap justify-content-between align-items-center mb-5 mt-4">
+        <div class="text-justify w-full sm:w-auto">
             <h4 class="m-0">Listado de usuarios</h4>
         </div>
-        <div>
+        <div class="w-full sm:w-auto mt-4 sm:mt-0">
             <p-button label="Nuevo" [rounded]="true" (click)="createUser()" icon="pi pi-plus"></p-button>
         </div>
     </div>
-
-
-
-    <p-table [value]="users" [paginator]="true" [rows]="5" [first]="first" [showCurrentPageReport]="true"
-        currentPageReportTemplate="{first} a {last} de {totalRecords}" responsiveLayout="stack" [breakpoint]="'670px'"  [responsive]="true"
-       (onPage)="pageChange($event)" [rowsPerPageOptions]="[10, 25, 50]">
-
+    <p-table [value]="users" [paginator]="true" [rows]="5" [first]="first" [showCurrentPageReport]="true" 
+        currentPageReportTemplate="{first} a {last} de {totalRecords}" responsiveLayout="stack" [breakpoint]="'670px'" 
+        [responsive]="true" (onPage)="pageChange($event)" [rowsPerPageOptions]="[10, 25, 50]">
         <!-- Cabecera de la tabla -->
         <ng-template pTemplate="header">
             <tr>
@@ -26,23 +20,20 @@
                 </th>
             </tr>
         </ng-template>
-
         <!-- Cuerpo de la tabla -->
         <ng-template pTemplate="body" let-user>
             <tr>
-                <td> <span class="p-column-title">DNI:</span> {{ user.dni }}</td>
+                <td><span class="p-column-title">DNI:</span>{{ user.dni }}</td>
                 <td><span class="p-column-title">Nombres:</span>{{ user.fullName }}</td>
                 <td><span class="p-column-title">Correo:</span>{{ user.email }}</td>
-                <td><span class="p-column-title">Descripción:</span>{{ user?.roles[0]?.description }}</td>
+                <td><span class="p-column-title">Descripción:</span>{{ user?.roles[0]?.description }}</td>
                 <td><span class="p-column-title">Estado:</span><app-status [status]="user.status"></app-status></td>
-                <td><span class="p-column-title">Fecha Creación:</span>{{ user?.createdAt }}</td>
+                <td><span class="p-column-title">Fecha Creación:</span>{{ user?.createdAt }}</td>
                 <td><span class="p-column-title">Acciones:</span>
-                        <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-primary mr-2"
-                            (click)="updateUser(user)"></button>
+                    <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-primary mr-2"
+                        (click)="updateUser(user)"></button>
                 </td>
             </tr>
         </ng-template>
     </p-table>
-
-
 </div>

@@ -54,7 +54,7 @@ export class MiningUnitFormComponent {
 
     this.form.patchValue({
       ...this.selectedItem,
-      statusId: this.selectedItem.status.id,
+      statusId: this.selectedItem?.status?.id,
     })
   }
 

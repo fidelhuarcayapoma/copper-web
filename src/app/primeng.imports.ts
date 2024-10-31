@@ -18,6 +18,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
+import { CardModule } from 'primeng/card';
 
 export const PRIMENG_MODULES = [
   ButtonModule,
@@ -46,4 +47,5 @@ export const PRIMENG_MODULES = [
   ConfirmDialogModule,
   DialogModule,
   TooltipModule,
+  CardModule,
 ];

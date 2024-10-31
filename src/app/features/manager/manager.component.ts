@@ -25,6 +25,7 @@ import { DialogModule } from 'primeng/dialog';
 import { Status } from '../../shared/interfaces/status.interface';
 import { FormGroup, UntypedFormGroup } from '@angular/forms';
 import { StatusService } from '../../shared/service/status.service';
+import { Column } from '../../core/interfaces/column.interface';
 
 
 @Component({
@@ -60,7 +61,8 @@ export class ManagerComponent implements OnInit {
   private messageService = inject(MessageService);
 
   files: TreeNode[] = [];
-  cols: any[] = [];
+  cols: Column[] = [];
+
   filterMode: string = 'strict';
   loading: boolean = false;
   displayDialog: boolean = false;
@@ -75,10 +77,10 @@ export class ManagerComponent implements OnInit {
 
   ngOnInit() {
     this.cols = [
-      { field: 'name', header: 'Nombre' },
-      { field: 'status', header: 'Estado' },
-      { field: 'createdAt', header: 'Fecha Creación' },
-      { field: 'actions', header: 'Acciones' }
+      { field: 'name', header: 'Nombre', sortable: true },
+      { field: 'status', header: 'Estado', sortable: true },
+      { field: 'createdAt', header: 'Fecha Creación', sortable: true },
+      { field: 'actions', header: 'Acciones', sortable: false }
     ];
 
     this.loadInitialData();
@@ -104,7 +106,7 @@ export class ManagerComponent implements OnInit {
         break;
       case 'miningUnit':
         break;
-      case 'equipment':console.log(this.parentNode?.data);
+      case 'equipment': console.log(this.parentNode?.data);
         this.areaService
           .getAreas()
           .subscribe((res) => {
