@@ -58,16 +58,14 @@ export class TopbarComponent implements OnInit {
     });
   }
 
-  // Método para redirigir al perfil del usuario
   goToProfile() {
-    this.router.navigate(['/profile']);  // Cambia '/profile' por la ruta adecuada
+    this.router.navigate(['/profile']);  
   }
 
-  // Método para manejar el logout
+
   logout() {
-    this.authService.logout();  // Llamar al método de logout del servicio de autenticación
-    this.router.navigate(['/login']);  // Redirigir al login después de cerrar sesión
+    this.authService.logout();  
+    this.router.navigate(['/login']);  
+
   }
-
-
 }

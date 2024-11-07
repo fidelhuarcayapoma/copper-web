@@ -1,5 +1,5 @@
-<p-toast></p-toast>
-<div class="p-card p-4 w-full sm:w-auto">
+<p-toast/>
+<div class="p-card p-4 ">
     <div class="flex flex-wrap justify-content-between align-items-center mb-5 mt-4">
         <div class="text-justify w-full sm:w-auto">
             <h4 class="m-0">Listado de usuarios</h4>
@@ -11,7 +11,6 @@
     <p-table [value]="users" [paginator]="true" [rows]="5" [first]="first" [showCurrentPageReport]="true" 
         currentPageReportTemplate="{first} a {last} de {totalRecords}" responsiveLayout="stack" [breakpoint]="'670px'" 
         [responsive]="true" (onPage)="pageChange($event)" [rowsPerPageOptions]="[10, 25, 50]">
-        <!-- Cabecera de la tabla -->
         <ng-template pTemplate="header">
             <tr>
                 <th *ngFor="let col of columns" [pSortableColumn]="col.sortable ? col.field : ''">
@@ -20,7 +19,6 @@
                 </th>
             </tr>
         </ng-template>
-        <!-- Cuerpo de la tabla -->
         <ng-template pTemplate="body" let-user>
             <tr>
                 <td><span class="p-column-title">DNI:</span>{{ user.dni }}</td>
