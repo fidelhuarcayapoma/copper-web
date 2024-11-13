@@ -19,8 +19,8 @@ import { CourseService } from './services/course.service';
     CourseFormComponent
   ],
   providers: [
-    DialogService, 
-    MessageService, 
+    DialogService,
+    MessageService,
     CourseService,
   ],
   templateUrl: './course.component.html',
@@ -41,20 +41,30 @@ export class CourseComponent implements OnInit {
   showAddCourseDialog() {
     this.showDialog = true;
   }
+  editCourse(course: Course) {
+    this.showDialog = true;
+    this.courseForm.patchValue(course);
+  }
 
   save(event: any) {
+    const course = event.value;
+    const courseId = course.id;
+  
     if (this.courseForm.valid) {
-      const course = event.value;
-
-      this.courseService.createCourse(course).subscribe((course) => {
-        this.courses.push(course);
+      this.courseService.createCourse(course).subscribe((newCourse) => {
+        const index = this.courses.findIndex(c => c.id === courseId);
+        if (index !== -1) {
+          this.courses[index] = newCourse;  // Reemplaza el curso existente
+        } else {
+          this.courses.push(newCourse);  // Agrega el nuevo curso
+        }
         this.courseForm.reset();
         this.isLoading = false;
-      })
+      });
       this.showDialog = false;
-
     }
   }
+  
 
   close() {
     this.showDialog = false;
@@ -62,6 +72,7 @@ export class CourseComponent implements OnInit {
   }
   ngOnInit() {
     this.courseForm = new FormGroup({
+      id: new FormControl(),
       name: new FormControl('', Validators.required),
       description: new FormControl('', Validators.required),
       banner: new FormControl('', Validators.required)
@@ -71,7 +82,7 @@ export class CourseComponent implements OnInit {
         this.courses = courses;
         this.isLoading = false;
       }
-      
+
     });
 
   }
