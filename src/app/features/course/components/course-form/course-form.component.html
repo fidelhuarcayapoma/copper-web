@@ -1,0 +1,33 @@
+<div *ngIf="form">
+    <form  [formGroup]="form" (ngSubmit)="onSave()">
+        <div class="field">
+            <label for="name" class="block mb-2">Nombre:</label>
+            <input type="text" pInputText id="name" formControlName="name" placeholder="Ingrese el nombre" class="w-full">
+            <small class="p-error" *ngIf="form?.get('name')?.invalid && form.get('name')?.touched">
+                El nombre es requerido
+            </small>
+        </div>
+        <div class="field">
+            <label for="description" class="block mb-2">Descripcion:</label>
+            <textarea type="text" pInputTextarea id="description" formControlName="description"
+                placeholder="Ingrese la description" class="w-full"></textarea>
+            <small class="p-error" *ngIf="form?.get('description')?.invalid && form.get('description')?.touched">
+                La description es requerida
+            </small>
+        </div>
+        <div class="field">
+            <label for="banner" class="block mb-2">Banner URL:</label>
+            <input type="text" pInputText id="banner" formControlName="banner" placeholder="Ingrese la URL del banner" class="w-full">
+            <small class="p-error" *ngIf="form?.get('banner')?.invalid && form.get('banner')?.touched">
+                La URL del banner es requerida
+            </small>
+        </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+        <button pButton type="button" label="Cancelar" (click)="onCancel()" class="p-button-text" >
+        </button>
+        <button pButton type="submit" label="Guardar" class="p-button-text" [disabled]="form.invalid">
+        </button>
+    </div>
+</form>
+</div>

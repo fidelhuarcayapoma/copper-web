@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';  // Importar el Router para redirigir
 import { LayoutService } from '../../services/app.layout.service';
 import { MenuItem } from 'primeng/api';  // Importar MenuItem para configurar el menú
@@ -10,6 +10,8 @@ import { AuthService } from '../../auth/service/auth.service';
 import { AvatarModule } from 'primeng/avatar';
 import { RippleModule } from 'primeng/ripple';
 import { User } from '../../../features/users/interface/user.interface';
+import { AppInfoService } from '../../services/app-info.service';
+import { APP_INFO, AppInfo } from '../../data/resource/app-info';
 @Component({
   selector: 'app-topbar',
   standalone: true,
@@ -31,12 +33,12 @@ export class TopbarComponent implements OnInit {
 
   items: MenuItem[] = [];  
   firstChar: string = '';
+  appInfoService = inject(AppInfoService);
+  layoutService = inject(LayoutService);
+  authService = inject(AuthService);
+  router = inject(Router);
+  appInfo: AppInfo = APP_INFO;
 
-  constructor(
-    public layoutService: LayoutService,
-    private authService: AuthService,  // Inyectar AuthService para manejar la autenticación
-    private router: Router  // Inyectar Router para la navegación
-  ) {}
 
   ngOnInit() {
     // Configurar los elementos del menú

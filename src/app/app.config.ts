@@ -6,7 +6,6 @@ import { provideClientHydration } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { providePrimeNgTheme } from './primeng-config';
-import { TokenInterceptor } from './core/interceptor/token.interceptor';
 import { AuthInterceptor } from './core/interceptor/auth.interceptor';
 import { JwtModule } from '@auth0/angular-jwt';
 import { LoaderInterceptor } from './core/interceptor/loader.interceptor';

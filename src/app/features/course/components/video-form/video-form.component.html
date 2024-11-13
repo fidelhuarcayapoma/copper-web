@@ -1,0 +1,24 @@
+<form [formGroup]="form" (ngSubmit)="onSave()">
+    <div class="field">
+        <label for="title">Título</label>
+        <input pInputText id="title" formControlName="title" />
+        <small class="p-error" *ngIf="form.get('title')?.invalid && form.get('title')?.touched">
+            El título es requerido
+        </small>
+    </div>
+
+    <div class="field">
+        <label for="url">URL del Video</label>
+        <input pInputText id="url" formControlName="url" />
+        <small class="p-error" *ngIf="form.get('url')?.invalid && form.get('url')?.touched">
+            Ingrese una URL válida
+        </small>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+        <button pButton type="button" label="Cancelar" icon="pi pi-times" (click)="onCancel()" class="p-button-text">
+        </button>
+        <button pButton type="submit" label="Guardar" icon="pi pi-check" class="p-button-text"
+            [disabled]="form.invalid">
+        </button>
+    </div>
+</form>

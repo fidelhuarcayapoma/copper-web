@@ -1,0 +1,41 @@
+<div class="card">
+    <button pButton type="button" icon="pi pi-plus" label="Agregar Curso" (click)="showAddCourseDialog()" class="p-button-outlined mb-4">
+    </button>
+
+    <div class="course-container">
+        @if (!isLoading) {
+            <div *ngFor="let course of courses" class="course-card">
+                <div class="image-container">
+                    <img [src]="course.banner" [alt]="course.name" class="card-image">
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">{{ course.name }}</h3>
+                    <div class="card-actions">
+                        <button pButton type="button" icon="pi pi-pencil" class="p-button-text"></button>
+                        <a [routerLink]="['/course', course.id]" class="text-blue-500 hover:text-blue-700">
+                            Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+        @else if (courses.length === 0 && !isLoading) {
+            <p>No hay cursos disponibles.</p>
+        }
+        @else {
+            @for (item of items; track $index) {
+            <p-skeleton width="100%" height="12rem" styleClass="mb-2" />
+            }
+        }
+
+
+    </div>
+</div>
+
+<p-dialog header="Agregar Curso" [(visible)]="showDialog" [modal]="true" [responsive]="true"
+    [style]="{width: '450px'}" styleClass="p-fluid">
+    <app-course-form [form]="courseForm" *ngIf="showDialog" (cancel)="close()"
+        (save)="save($event)"/>
+</p-dialog>
+
+<p-toast/>

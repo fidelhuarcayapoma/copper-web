@@ -11,6 +11,8 @@ import { CraftComponent } from './features/craft/craft.component';
 import { MiningUnitComponent } from './features/mining-unit/mining-unit.component';
 import { DocumentComponent } from './features/document/document.component';
 import { ManagerComponent } from './features/manager/manager.component';
+import { CourseComponent } from './features/course/course.component';
+import { CourseDetailComponent } from './features/course/components/course-detail/course-detail.component';
 
 export const routes: Routes = [
   {
@@ -50,6 +52,14 @@ export const routes: Routes = [
       {
         path: 'manager',
         component: ManagerComponent,
+      },
+      {
+        path: 'courses',
+        component: CourseComponent,
+      },
+      {
+        path: 'course/:id',
+        component: CourseDetailComponent,
       }
     ],
   },

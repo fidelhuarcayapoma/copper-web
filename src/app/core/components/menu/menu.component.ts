@@ -48,6 +48,10 @@ export class MenuComponent implements OnInit {
                         
                     },
                     {
+                        label: 'Cursos', icon: 'pi pi-fw pi-graduation-cap', routerLink: ['/courses'],
+                        
+                    },
+                    {
                         label: 'Administrar', icon: 'pi pi-fw pi-th-large', routerLink: ['/manager'],
                     },
                     {

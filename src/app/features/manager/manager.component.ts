@@ -26,6 +26,7 @@ import { Status } from '../../shared/interfaces/status.interface';
 import { FormGroup, UntypedFormGroup } from '@angular/forms';
 import { StatusService } from '../../shared/service/status.service';
 import { Column } from '../../core/interfaces/column.interface';
+import { DialogService } from 'primeng/dynamicdialog';
 
 
 @Component({
@@ -45,8 +46,7 @@ import { Column } from '../../core/interfaces/column.interface';
     CraftFormComponent,
   ],
   providers: [
-    MessageService,
-  ],
+    DialogService, MessageService,  ],
   templateUrl: './manager.component.html',
   styleUrl: './manager.component.scss'
 })

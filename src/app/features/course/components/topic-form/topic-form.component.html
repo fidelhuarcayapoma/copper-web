@@ -1,0 +1,18 @@
+<div *ngIf="form">
+    <form [formGroup]="form" (ngSubmit)="onSave()">
+        <div class="field">
+            <label for="name" class="block mb-2">Nombre:</label>
+            <input type="text" pInputText id="name" formControlName="name" placeholder="Ingrese el nombre" class="w-full">
+            <small class="p-error" *ngIf="form?.get('name')?.invalid && form.get('name')?.touched">
+                El nombre es requerido
+            </small>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+            <button pButton type="button" label="Cancelar" icon="pi pi-times" (click)="onCancel()" class="p-button-text">
+            </button>
+            <button pButton type="submit" label="Guardar" icon="pi pi-check" class="p-button-text" [disabled]="form.invalid">
+            </button>
+        </div>
+    </form>
+</div>
