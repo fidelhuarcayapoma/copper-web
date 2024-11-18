@@ -93,3 +93,15 @@
       transform: scale(1.02);
     }
   }
+
+
+  .card .course-link {
+    text-decoration: none;
+    color: inherit;
+    font-size: large;
+    font-weight: bold;
+}
+
+.card .course-link:hover {
+    color: #007bff; /* Cambia el color cuando se pasa el ratón por encima */
+}

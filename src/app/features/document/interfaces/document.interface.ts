@@ -8,4 +8,6 @@ export interface Document {
   craft: Craft;
   status: Status;
   createdAt: string;
+  craftId: number;
+  files: File[];
 }

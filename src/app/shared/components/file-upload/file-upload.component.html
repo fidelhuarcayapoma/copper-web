@@ -1,0 +1,47 @@
+<div class="upload-modal">
+    <div class="modal-header">
+        <!-- Header Content -->
+    </div>
+
+    <div class="modal-body">
+        <h3 class="modal-title">Subir archivos</h3>
+        <p class="modal-description">Adjunte sus archivos a continuación</p>
+
+        <div class="upload-area" appDragDrop [acceptedFileTypes]="acceptedFileTypes" [maxFileSize]="maxFileSize"
+            (fileDropped)="onFileDropped($event)" (click)="fileInput.click()">
+
+            <input #fileInput type="file" [multiple]="multiple" [accept]="acceptedFileTypes.join(',')"
+                (change)="onFileSelected($event)" class="hidden" />
+
+            <span class="upload-area-icon">
+                <i class="pi pi-file-arrow-up" style="font-size: 2.5rem"></i>
+            </span>
+            <span class="upload-area-title">Arrastre y suelte archivos aquí</span>
+            <span class="upload-area-description">
+                o <strong (click)="fileInput.click()">busque</strong> para elegir archivos
+            </span>
+            <span class="upload-constraints">
+                {{ acceptedFileTypes.join(', ') }} hasta {{ maxFileSize }}MB
+            </span>
+        </div>
+
+        <div class="file-list" *ngIf="files.length > 0">
+            <div class="file-item" *ngFor="let file of files; let i = index">
+                <div class="file-item-info">
+                    <i [class]="getFileIcon(file.name)"></i>
+                    <div class="file-details">
+                        <span class="file-name">{{ file.name }}</span>
+                        <span class="file-size">{{ file.size | fileSize }}</span>
+                    </div>
+                </div>
+                <button pButton type="button" icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger"
+                    (click)="removeFile(i)" pTooltip="Eliminar archivo"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer" *ngIf="files.length > 0">
+        <button pButton type="button" label="Cancelar" class="p-button-text" (click)="clearFiles()"></button>
+        <button pButton type="button" label="Subir Archivos" class="p-button-success" (click)="uploadFiles()"></button>
+    </div>
+</div>

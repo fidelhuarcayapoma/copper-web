@@ -1,0 +1,29 @@
+.privacy-policy {
+    max-width: 800px;
+    margin: auto;
+  
+    .privacy-card {
+      width: 100%;
+      background: #ffffff;
+      border-radius: 8px;
+  
+      h2 {
+        font-size: 1.5rem;
+        color: #007ad9;
+      }
+  
+      ul {
+        list-style-type: disc;
+      }
+  
+      .privacy-link {
+        color: #007ad9;
+        text-decoration: none;
+  
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+  

@@ -83,7 +83,7 @@ export class CraftComponent extends CrudComponent<Craft> implements OnInit {
     });
   }
 
-  editCraft(craft: Craft) {
+  editCraft(craft: Craft) {console.log(craft);
     this.selectedItem = craft;
     this.dialogVisible = true;
   }

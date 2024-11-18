@@ -1,33 +1,21 @@
-<form [formGroup]="form">
-    <div class="p-fluid p-formgrid p-grid">
-        <div class="field p-col-12 p-md-6">
-            <label for="name">Nombre:</label>
-            <input id="name" type="text" pInputText formControlName="name" />
+
+    <form [formGroup]="form">
+        <div class="p-fluid p-formgrid p-grid">
+            <div class="field p-col-12 p-md-6">
+                <label for="craft">Manual:</label>
+                <p-dropdown id="craft" [options]="crafts" optionLabel="name" formControlName="craftId" optionValue="id"
+                    appendTo="body" [showClear]="true" placeholder="Seleccione un Manual"></p-dropdown>
+                <small class="p-error" *ngIf="submitted && form.get('craftId')?.invalid">Craft is
+                    required.</small>
+            </div>
+            <app-file-upload
+            [acceptedFileTypes]="['.pdf', '.docx', '.ppt', '.pptx', '.png', '.jpg']"
+            [maxFileSize]="100"
+            [multiple]="true"
+            [maxFiles]="30"
+            (filesSelected)="onSelectedFiles($event)"
+          ></app-file-upload>
         </div>
 
-        <div class="field p-col-12 p-md-6">
-            <label for="url">URL:</label>
-            <input id="url" type="text" pInputText formControlName="url" />
-        </div>
-        <div class="field p-col-12 p-md-6">
-            <label for="craft">Manual:</label>
-            <p-dropdown id="craft" [options]="crafts" optionLabel="name" formControlName="craftId" optionValue="id"
-                appendTo="body"></p-dropdown>
-            <small class="p-error" *ngIf="submitted && form.get('craftId')?.invalid">Craft is
-                required.</small>
-        </div>
-        <div class="field p-col-12 p-md-6">
-            <label for="status">Estado:</label>
-            <p-dropdown id="status" [options]="statuses" optionLabel="description" formControlName="statusId"
-                optionValue="id" appendTo="body"></p-dropdown>
-            <small class="p-error" *ngIf="submitted && form.get('statusId')?.invalid">Status is
-                required.</small>
+    </form>
 
-        </div>
-    </div>
-
-    <div class="flex align-items-end  justify-content-end mt-4">
-        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="onCancel()"></button>
-        <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" (click)="onSubmit()"></button>
-    </div>
-</form>

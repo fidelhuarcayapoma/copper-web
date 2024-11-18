@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToolbarModule } from 'primeng/toolbar';
 import { PRIMENG_MODULES } from '../../primeng.imports';
 import { StatusComponent } from '../../shared/components/status/status.component';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { MessageService, ConfirmationService, PrimeNGConfig } from 'primeng/api';
 import { StatusService } from '../../shared/service/status.service';
 import { CraftService } from '../craft/services/craft.service';
 import { Status } from '../../shared/interfaces/status.interface';
@@ -19,17 +19,23 @@ import { MiningUnit } from '../mining-unit/interfaces/mining-unit.interface';
 import { AreaService } from '../area/services/area.service';
 import { EquipmentService } from '../equipment/service/equipmet.service';
 import { DropdownChangeEvent } from 'primeng/dropdown';
+import { FileUploadModule } from 'primeng/fileupload';
+import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
+import { DocumentFormComponent } from "./components/document-form/document-form.component";
 
 @Component({
   selector: 'app-document',
   standalone: true,
   imports: [
-    ...PRIMENG_MODULES,
     CommonModule,
     ToolbarModule,
     ReactiveFormsModule,
     StatusComponent,
-    UploadComponent
+    UploadComponent,
+    FileUploadModule,
+    FileUploadComponent,
+    ...PRIMENG_MODULES,
+    DocumentFormComponent
 ],
   providers: [
     MessageService,
@@ -39,12 +45,12 @@ import { DropdownChangeEvent } from 'primeng/dropdown';
   styleUrl: './document.component.scss'
 })
 export class DocumentComponent implements OnInit {
-changeEquipment($event: DropdownChangeEvent) {
-throw new Error('Method not implemented.');
-}
-changeArea($event: DropdownChangeEvent) {
-throw new Error('Method not implemented.');
-}
+  changeEquipment($event: DropdownChangeEvent) {
+    throw new Error('Method not implemented.');
+  }
+  changeArea($event: DropdownChangeEvent) {
+    throw new Error('Method not implemented.');
+  }
   documents: Document[] = [];
   equipments: Equipment[] = [];
   areas: Area[] = [];
@@ -59,29 +65,27 @@ throw new Error('Method not implemented.');
   documentDialog = false;
   submitted = false;
 
-  constructor(
-    private documentService: DocumentService,
-    private craftService: CraftService,
-    private statusService: StatusService,
-    private messageService: MessageService,
-    private equipmentService: EquipmentService,
-    private areaService: AreaService,
-  ) {
+  files: File[] = [];
 
-  }
+  totalSize: number = 0;
+
+  totalSizePercent: number = 0;
+
+  private config = inject(PrimeNGConfig);
+  private messageService = inject(MessageService);
+  private documentService = inject(DocumentService);
+  private craftService = inject(CraftService);
 
   ngOnInit() {
-    this.loadDocuments();
     this.loadCrafts();
-    this.loadStatuses();
+    this.loadDocuments();
     this.initForm();
   }
 
   initForm(): void {
     this.documentForm = new FormGroup({
-      name: new FormControl('', [Validators.required]),
-      url: new FormControl('', [Validators.required]),
-      craftId: new FormControl('', [Validators.required]),
+      craftId: new FormControl(null, [Validators.required]),
+      files: new FormControl([], [Validators.required]),
       statusId: new FormControl(null),
     });
   }
@@ -99,22 +103,6 @@ throw new Error('Method not implemented.');
   }
 
 
-  loadEquipments() {
-    this.equipmentService.getAll().subscribe({
-      next: (data) => {
-        this.equipments = data;
-      },
-      error: (error) => {
-        console.error('Error loading equipments', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load equipments',
-        });
-      },
-    });
-  }
-
   loadCrafts() {
     this.craftService.getCrafts().subscribe({
       next: (data) => {
@@ -127,19 +115,7 @@ throw new Error('Method not implemented.');
     });
   }
 
-  loadStatuses() {
-    this.statusService.getAll().subscribe({
-      next: (data) => {
-        this.statuses = data;
-      },
-      error: (error) => {
-        console.error('Error loading statuses', error);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load statuses' });
-      }
-    });
-  }
-
-  onSubmit() {console.log('Formdff is invalid');
+  onSubmit() {
     if (this.documentForm.valid) {
       if (this.isEditing) {
         this.updateDocument();
@@ -149,12 +125,16 @@ throw new Error('Method not implemented.');
     } else {
       this.submitted = true;
       console.log('Form is invalid');
+      Object.keys(this.documentForm.controls).forEach(key => {
+        const control = this.documentForm.get(key);
+        console.log(key, control?.errors);
+      })
       this.documentForm.markAsDirty();
     }
   }
 
   createDocument() {
-    const document = this.documentForm.value;
+    const document = this.documentForm.value;console.log(document);
     this.documentService.createDocument(document).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Document created successfully' });
@@ -189,7 +169,7 @@ throw new Error('Method not implemented.');
       ...document,
       craftId: document?.craft?.id,
       statusId: document?.status?.id
-    }); 
+    });
     this.selectedDocument = document;
     this.documentDialog = true;
   }
@@ -197,12 +177,12 @@ throw new Error('Method not implemented.');
   deleteDocument(id: number) {
     this.documentService.deleteDocument(id).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Document deleted successfully' });
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Documento eliminado exitosamente' });
         this.loadDocuments();
       },
       error: (error) => {
         console.error('Error deleting document', error);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete document' });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar el documento' });
       }
     });
   }
@@ -229,14 +209,11 @@ throw new Error('Method not implemented.');
     return url;
   }
 
-  changeMiningUnit(event: any) {
-    this.areaService.getAreasByMiningUnitId(event.value).subscribe({
-      next:(data) => {
-        this.areas = data;
-      },
-      error:(error) => {
-        console.error('Error loading areas', error);
-      }
-    });
+  onTemplatedUpload() {
+    this.messageService.add({ severity: 'info', summary: 'Éxito', detail: 'Archivo subido', life: 3000 });
   }
+
+
+
+
 }

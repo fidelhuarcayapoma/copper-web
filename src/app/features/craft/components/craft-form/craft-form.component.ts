@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Status } from '../../../../shared/interfaces/status.interface';
 import { Area } from '../../../area/interfaces/area.interface';
@@ -16,12 +16,12 @@ import { PRIMENG_MODULES } from '../../../../primeng.imports';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    PRIMENG_MODULES,
+    ...PRIMENG_MODULES,
   ],
   templateUrl: './craft-form.component.html',
   styleUrl: './craft-form.component.scss'
 })
-export class CraftFormComponent {
+export class CraftFormComponent implements OnInit, OnChanges {
   @Input() submitted: boolean = false;
   @Input() craft: Craft | null = null;
   @Input() equipments: Equipment[] = [];
@@ -30,40 +30,38 @@ export class CraftFormComponent {
   @Output() save = new EventEmitter<any>();
   @Output() cancel = new EventEmitter<void>();
 
-  @Input() form!: FormGroup;
+  @Input() form: FormGroup;
 
-  ngOnInit() {
-    this.initForm();
-  }
-
-
-  private initForm() {
+  constructor() {
     this.form = new FormGroup({
       name: new FormControl('', [Validators.required]),
       equipmentId: new FormControl('', [Validators.required]),
       statusId: new FormControl('', [Validators.required]),
     });
+  }
 
-    this.form.patchValue({
-      ...this.craft,
-      miningUnitId: this.craft?.equipment?.id,
-      statusId: this.craft?.status?.id
-    });
+  ngOnInit(): void {
+    this.updateFormValues();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['craft'] && !changes['craft'].firstChange) {
+      this.updateFormValues();
+    }
+  }
+
+  private updateFormValues() {
+    if (this.craft) {
+      this.form.patchValue({
+        name: this.craft.name,
+        equipmentId: this.craft.equipment?.id,
+        statusId: this.craft.status?.id
+      });
+    }
   }
 
   onSubmit() {
-
-
-    if (this.form.valid) {
-      this.save.emit(this.form);
-    }else{
-      Object.keys(this.form.controls).forEach(key => {
-        const control = this.form.get(key);
-        if (control) {
-          console.log(key, control.errors)
-        }
-      })
-    }
+      this.save.emit(this.form.value);
   }
 
   onCancel() {

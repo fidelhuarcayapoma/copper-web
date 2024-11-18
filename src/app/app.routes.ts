@@ -13,6 +13,7 @@ import { DocumentComponent } from './features/document/document.component';
 import { ManagerComponent } from './features/manager/manager.component';
 import { CourseComponent } from './features/course/course.component';
 import { CourseDetailComponent } from './features/course/components/course-detail/course-detail.component';
+import { PrivacyPolicyComponent } from './features/privacy-policy/privacy-policy.component';
 
 export const routes: Routes = [
   {
@@ -58,10 +59,14 @@ export const routes: Routes = [
         component: CourseComponent,
       },
       {
-        path: 'course/:id',
+        path: 'courses/:id',
         component: CourseDetailComponent,
       }
     ],
+  },
+  {
+    path: 'privacy-policy',
+    component: PrivacyPolicyComponent,
   },
   {
     path: 'login',

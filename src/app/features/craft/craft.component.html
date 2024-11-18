@@ -9,7 +9,9 @@
     </ng-template>
   </p-toolbar>
 
-  <p-table #dt [value]="items">
+  <p-table #dt [value]="items" [paginator]="true" [rows]="5" [showCurrentPageReport]="true" 
+  currentPageReportTemplate="{first} a {last} de {totalRecords}" responsiveLayout="stack" [breakpoint]="'670px'" 
+  [responsive]="true" [rowsPerPageOptions]="[10, 25, 50]" styleClass="p-datatable-sm">
     <ng-template pTemplate="caption">
       <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
         <h5 class="m-0">Administrar Manuales</h5>
@@ -24,10 +26,10 @@
     
     <ng-template pTemplate="header">
       <tr>
-        <th>Name</th>
-        <th>Equipment</th>
-        <th>Status</th>
-        <th>Actions</th>
+        <th>Nombre</th>
+        <th>Equipo</th>
+        <th>Estado</th>
+        <th>Acciones</th>
       </tr>
     </ng-template>
     

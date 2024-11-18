@@ -22,7 +22,13 @@ export class DocumentService {
   }
 
   createDocument(document: Document): Observable<Document> {
-    return this.http.post<Document>(this.apiUrl, document);
+    const formData  = new FormData();
+    formData.append('craftId', document.craftId.toString());
+    document.files.forEach(file => {
+      formData.append('files', file);
+    })
+    return this.http.post<Document>(this.apiUrl, formData);
+
   }
 
   updateDocument(document: Document): Observable<Document> {
