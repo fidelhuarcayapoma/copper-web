@@ -14,6 +14,7 @@ import { ManagerComponent } from './features/manager/manager.component';
 import { CourseComponent } from './features/course/course.component';
 import { CourseDetailComponent } from './features/course/components/course-detail/course-detail.component';
 import { PrivacyPolicyComponent } from './features/privacy-policy/privacy-policy.component';
+import { DeleteAccountComponent } from './features/delete-account/delete-account.component';
 
 export const routes: Routes = [
   {
@@ -67,6 +68,10 @@ export const routes: Routes = [
   {
     path: 'privacy-policy',
     component: PrivacyPolicyComponent,
+  },
+  {
+    path: 'delete-account',
+    component: DeleteAccountComponent,
   },
   {
     path: 'login',
