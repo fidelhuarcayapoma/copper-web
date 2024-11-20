@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Status } from '../../../../shared/interfaces/status.interface';
 import { Area } from '../../../area/interfaces/area.interface';
@@ -22,9 +22,9 @@ import { Equipment } from '../../interfaces/equipment.interface';
   templateUrl: './equipment-form.component.html',
   styleUrl: './equipment-form.component.scss'
 })
-export class EquipmentFormComponent {
+export class EquipmentFormComponent { 
   @Input() submitted: boolean = false;
-  @Input() equipment: Equipment | null = null;
+
   @Input() areas: Area[] = [];
   @Input() statuses: Status[] = [];
 
@@ -33,16 +33,28 @@ export class EquipmentFormComponent {
 
   @Input() form!: FormGroup;
 
-  ngOnInit() {
+  _equipment: Equipment | null = null;
+
+
+
+  @Input() set equipment(equipment: Equipment | null) {
+    this._equipment = equipment;
     this.initForm();
   }
+
+  get equipment(): Equipment | null {
+    return this._equipment;
+  }
+ 
+
 
   private initForm() {
     this.form = new FormGroup({
       name: new FormControl(null, [Validators.required]),
       areaId: new FormControl(null, [Validators.required]),
-      statusId: new FormControl(null, [Validators.required]),
+      statusId: new FormControl(null),
     });
+    this.form.reset();
 
     this.form.patchValue({
       ...this.equipment,

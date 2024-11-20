@@ -86,7 +86,8 @@ export class AreaComponent extends CrudComponent<Area> implements OnInit {
     this.dialogVisible = true;
   }
 
-  saveArea(areaData: any) {
+  saveArea(form: FormGroup) {
+    const areaData = form.value;
     if (this.selectedItem?.id) {
       this.areaService.updateArea(this.selectedItem.id, areaData).subscribe({
         next: () => {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Status } from '../../../../shared/interfaces/status.interface';
 import { Area } from '../../../area/interfaces/area.interface';
@@ -19,20 +19,18 @@ import { MessageService, PrimeNGConfig } from 'primeng/api';
     ReactiveFormsModule,
     FileUploadComponent,
     ...PRIMENG_MODULES,
-  
+
   ],
   templateUrl: './document-form.component.html',
   styleUrl: './document-form.component.scss'
 })
-export class DocumentFormComponent {
+export class DocumentFormComponent implements OnInit {
   @Input() submitted: boolean = false;
-  @Input() document: Document | null = null;
   @Input() crafts: Craft[] = [];
   @Input() statuses: Status[] = [];
 
   @Output() save = new EventEmitter<any>();
-  @Output() cancel = new EventEmitter<void>();
-
+  @Output() cancel = new EventEmitter<void>()
   @Input() form!: FormGroup;
 
 
@@ -49,6 +47,17 @@ export class DocumentFormComponent {
 
   private config = inject(PrimeNGConfig);
   private messageService = inject(MessageService);
+  private _document: Document | null = null;
+
+  @Input()
+  set document(value: Document | null) {
+    this._document = value;
+    this.initForm();
+
+  }
+  get document(): Document | null {
+    return this._document;
+  }
   ngOnInit() {
     this.initForm();
   }
@@ -59,8 +68,8 @@ export class DocumentFormComponent {
       name: new FormControl(null, [Validators.required]),
       url: new FormControl(null, [Validators.required]),
       craftId: new FormControl(null, [Validators.required]),
-      statusId: new FormControl(null, [Validators.required]),
-    });
+      statusId: new FormControl(null,),
+    }); this.form.reset();
 
     this.form.patchValue({
       ...this.document,
@@ -85,30 +94,4 @@ export class DocumentFormComponent {
     this.cancel.emit();
   }
 
-  onSelectedFiles(event: any) {
-    this.files = Array.from(event);console.log(this.files);
-    this.form.patchValue({ files: this.files });
-    this.files.forEach((file: any) => {
-      this.totalSize += parseInt(this.formatSize(file.size));
-    });
-    this.totalSizePercent = this.totalSize / 10;
-  }
-
-  formatSize(bytes: number): string {
-    const k = 1024;
-    const dm = 3;
-    const sizes = this.config.translation.fileSizeTypes;
-    if (!sizes || sizes.length === 0) {
-      return `0 `;
-    }
-
-    if (bytes === 0) {
-      return `0 ${sizes[0]}`;
-    }
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
-
-    return `${formattedSize} ${sizes[i]}`;
-  }
 }

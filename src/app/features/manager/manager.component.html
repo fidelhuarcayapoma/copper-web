@@ -128,7 +128,7 @@
 
         @switch (currentItemType) {
         @case ('miningUnit'){
-        <app-mining-unit-form [form]="form" [selectedItem]="newItemData" [miningUnits]="items" [statuses]="statuses"
+        <app-mining-unit-form [form]="form" [miningUnit]="newItemData" [miningUnits]="items" [statuses]="statuses"
             (save)="saveNewItem($event)" (cancel)="onCancel()"></app-mining-unit-form>
         }
         @case ('area'){

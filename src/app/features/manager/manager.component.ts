@@ -106,7 +106,7 @@ export class ManagerComponent implements OnInit {
         break;
       case 'miningUnit':
         break;
-      case 'equipment': console.log(this.parentNode?.data);
+      case 'equipment': 
         this.areaService
           .getAreas()
           .subscribe((res) => {
@@ -132,7 +132,7 @@ export class ManagerComponent implements OnInit {
   }
 
   saveNewItem(form: FormGroup) {
-    const value = form.getRawValue();
+    const value = form.getRawValue();console.log(value);
 
     this.loading = true;
     let saveOperation: Observable<any>;

@@ -25,7 +25,6 @@ import { CraftFormComponent } from '../../../craft/components/craft-form/craft-f
 })
 export class MiningUnitFormComponent {
   @Input() submitted: boolean = false;
-  @Input() selectedItem: MiningUnit | null = null;
   @Input() miningUnits: MiningUnit[] = [];
   @Input() statuses: Status[] = [];
 
@@ -34,9 +33,15 @@ export class MiningUnitFormComponent {
 
   @Input() form!: FormGroup;
 
+  _miningUnit: MiningUnit | null = null;
 
-  ngOnInit() {
+  @Input() set miningUnit(value: MiningUnit | null) {
+    this._miningUnit = value;
     this.initForm();
+  }
+
+  get miningUnit(): MiningUnit | null {
+    return this._miningUnit;
   }
 
 
@@ -48,13 +53,10 @@ export class MiningUnitFormComponent {
       statusId: new FormControl(null, [Validators.required]),
     });
 
-    if (!this.selectedItem) {
-      return;
-    }
-
+    this.form.reset();
     this.form.patchValue({
-      ...this.selectedItem,
-      statusId: this.selectedItem?.status?.id,
+      ...this.miningUnit,
+      statusId: this.miningUnit?.status?.id,
     })
   }
 
@@ -62,12 +64,6 @@ export class MiningUnitFormComponent {
     if (this.form.invalid) {
       this.submitted = true;
       this.form.markAsDirty();
-      Object.keys(this.form.controls).forEach(key => {
-        const control = this.form.get(key);
-        if (control) {
-          console.log(key, control.errors)
-        }
-      })
       return;
     }
 

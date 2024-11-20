@@ -10,6 +10,7 @@ import { StatusComponent } from '../../shared/components/status/status.component
 import { Table } from 'primeng/table';
 import { Status } from '../../shared/interfaces/status.interface';
 import { StatusService } from '../../shared/service/status.service';
+import { MiningUnitFormComponent } from './components/mining-unit-form/mining-unit-form.component';
 
 @Component({
   selector: 'app-mining-unit',
@@ -19,6 +20,8 @@ import { StatusService } from '../../shared/service/status.service';
     ReactiveFormsModule,
     ToolbarModule,
     StatusComponent,
+    MiningUnitFormComponent,
+
   ],
   providers: [MessageService, ConfirmationService, MiningUnitService],
   templateUrl: './mining-unit.component.html',
@@ -114,8 +117,9 @@ export class MiningUnitComponent  implements OnInit{
     this.initForm();
   }
 
-  saveMiningUnit() {
+  saveMiningUnit(form: FormGroup) {
     this.submitted = true;
+    this.miningUnitForm = form;
 
     if (this.miningUnitForm.valid) {
       const miningUnitData = this.miningUnitForm.value;

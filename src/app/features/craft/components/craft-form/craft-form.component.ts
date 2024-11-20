@@ -21,47 +21,44 @@ import { PRIMENG_MODULES } from '../../../../primeng.imports';
   templateUrl: './craft-form.component.html',
   styleUrl: './craft-form.component.scss'
 })
-export class CraftFormComponent implements OnInit, OnChanges {
+export class CraftFormComponent {
   @Input() submitted: boolean = false;
-  @Input() craft: Craft | null = null;
   @Input() equipments: Equipment[] = [];
   @Input() statuses: Status[] = [];
   
   @Output() save = new EventEmitter<any>();
   @Output() cancel = new EventEmitter<void>();
 
-  @Input() form: FormGroup;
+  @Input() form!: FormGroup;
 
-  constructor() {
+  _craft: Craft | null = null;
+
+  @Input() set craft(value: Craft | null) {
+    this._craft = value;
+    this.initForm();
+  }
+
+  get craft(): Craft | null {
+    return this._craft;
+  }
+
+  initForm() {
     this.form = new FormGroup({
-      name: new FormControl('', [Validators.required]),
-      equipmentId: new FormControl('', [Validators.required]),
-      statusId: new FormControl('', [Validators.required]),
+      name: new FormControl(null, [Validators.required]),
+      equipmentId: new FormControl(null, [Validators.required]),
+      statusId: new FormControl(null,),
     });
-  }
+    this.form.reset();
 
-  ngOnInit(): void {
-    this.updateFormValues();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['craft'] && !changes['craft'].firstChange) {
-      this.updateFormValues();
-    }
-  }
-
-  private updateFormValues() {
-    if (this.craft) {
-      this.form.patchValue({
-        name: this.craft.name,
-        equipmentId: this.craft.equipment?.id,
-        statusId: this.craft.status?.id
-      });
-    }
+    this.form.patchValue({
+      ...this.craft,
+      equipmentId: this.craft?.equipment?.id,
+      statusId: this.craft?.status?.id,
+    })
   }
 
   onSubmit() {
-      this.save.emit(this.form.value);
+      this.save.emit(this.form);
   }
 
   onCancel() {

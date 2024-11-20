@@ -25,7 +25,6 @@ import { StatusComponent } from '../../../../shared/components/status/status.com
 })
 export class AreaFormComponent {
   @Input() submitted: boolean = false;
-  @Input() area: Area | null = null;
   @Input() miningUnits: MiningUnit[] = [];
   @Input() statuses: Status[] = [];
 
@@ -34,16 +33,26 @@ export class AreaFormComponent {
 
   @Input() areaForm!: FormGroup;
 
-  ngOnInit() {
+  _area: Area | null = null;
+
+  @Input() set area(value: Area | null) {
+    this._area = value;
     this.initForm();
   }
+
+  get area(): Area | null {
+    return this._area;
+  }
+  
 
   private initForm() {
     this.areaForm = new FormGroup({
       name: new FormControl(null, [Validators.required]),
       miningUnitId: new FormControl(null, [Validators.required]),
-      statusId: new FormControl(null, [Validators.required]),
+      statusId: new FormControl(null),
     });
+
+    this.areaForm.reset();
 
     this.areaForm.patchValue({
       ...this.area,

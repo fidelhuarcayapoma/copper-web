@@ -14,6 +14,7 @@ import { AreaService } from '../area/services/area.service';
 import { Table } from 'primeng/table';
 import { MiningUnitService } from '../mining-unit/services/mining-unit.service';
 import { MiningUnit } from '../mining-unit/interfaces/mining-unit.interface';
+import { EquipmentFormComponent } from './components/equipment-form/equipment-form.component';
 
 @Component({
   selector: 'app-equipment',
@@ -24,6 +25,7 @@ import { MiningUnit } from '../mining-unit/interfaces/mining-unit.interface';
     ToolbarModule,
     ReactiveFormsModule,
     StatusComponent,
+    EquipmentFormComponent,
   ], providers: [MessageService, ConfirmationService],
 
   templateUrl: './equipment.component.html',
@@ -49,7 +51,7 @@ export class EquipmentComponent {
   ) { }
 
   ngOnInit() {
-    this.loadMiningUnits();
+    this.loadAreas();
     this.loadEquipment();
     this.loadStatuses();
     this.initForm();
@@ -63,17 +65,16 @@ export class EquipmentComponent {
       statusId: new FormControl(null, []),
     })
   }
-  loadMiningUnits() {
-    this.miningUnitService.getMiningUnits().subscribe({
+  loadAreas() {
+    this.areaService.getAreas().subscribe({
       next: (data) => {
-        this.miningUnits = data;
+        this.areas = data;
       },
       error: (error) => {
-        console.error('Error loading mining units', error);
+        console.error('Error loading areas', error);
       }
     });
   }
-
   loadEquipment() {
     this.equipmentService.getAll().subscribe({
       next: (data) => {
@@ -139,8 +140,9 @@ export class EquipmentComponent {
     this.initForm();
   }
 
-  saveEquipment() {
+  saveEquipment(form: FormGroup) {
     this.submitted = true;
+    this.equipmentForm = form;
 
     if (this.equipmentForm.valid) {
       const equipmentData = this.equipmentForm.value;

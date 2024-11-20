@@ -51,30 +51,9 @@
 
 <p-dialog [(visible)]="miningUnitDialog" [style]="{width: '450px'}" header="Unidad Minera" [modal]="true"
   styleClass="p-fluid">
-  <form [formGroup]="miningUnitForm" (ngSubmit)="saveMiningUnit()">
-    <div class="field mb-4">
-      <label for="name">Nombre</label>
-      <input type="text" pInputText id="name" formControlName="name" required autofocus />
-      <small class="p-error" *ngIf="submitted && miningUnitForm.get('name')?.invalid">Name is required.</small>
-    </div>
-
-    <div class="field">
-      <label for="urlLogo">URL Logo</label>
-      <input type="text" pInputText id="urlLogo" formControlName="urlLogo" />
-    </div>
-
-    <div class="field">
-      <label for="status">Estado</label>
-      <p-dropdown [options]="statuses" formControlName="statusId" optionLabel="description" optionValue="id"
-      [showClear]="true" placeholder="Seleccione un Estado" appendTo="body">
-    </p-dropdown>
-      <small class="p-error" *ngIf="submitted && miningUnitForm.get('statusId')?.invalid">Status is required.</small>
-    </div>
-  </form>
-  <ng-template pTemplate="footer">
-    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-    <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveMiningUnit()"></button>
-  </ng-template>
+  <app-mining-unit-form [form]="miningUnitForm" [miningUnit]="selectedMiningUnit" [statuses]="statuses"
+    (save)="saveMiningUnit($event)" (cancel)="hideDialog()"></app-mining-unit-form>
 </p-dialog>
 
-<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+<p-confirmDialog [style]="{width: '450px'}"/>
+<p-toast/>

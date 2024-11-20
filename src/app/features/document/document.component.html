@@ -5,9 +5,10 @@
                 (click)="openNew()"></button>
         </ng-template>
     </p-toolbar>
-    <p-table #dt [value]="documents" [paginator]="true" [rows]="5" [showCurrentPageReport]="true" 
-    currentPageReportTemplate="{first} a {last} de {totalRecords}" responsiveLayout="stack" [breakpoint]="'670px'" 
-    [responsive]="true" [rowsPerPageOptions]="[10, 25, 50]" styleClass="p-datatable-sm">
+    <p-table #dt [value]="documents" [rows]="10" [paginator]="true" [scrollable]="true" 
+        [globalFilterFields]="['name','draft.name','status.name']" [rowHover]="true" dataKey="id"
+        currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} entradas"
+        [showCurrentPageReport]="true">
         <ng-template pTemplate="caption">
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
                 <h5 class="m-0">Administrar Documentos</h5>
@@ -24,7 +25,7 @@
                 <th>URL</th>
                 <th>Manual</th>
                 <th>Estado</th>
-                <th>Acciones</th>
+                <th alignFrozen="right" pFrozenColumn [frozen]="true">Acciones</th>
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-document>
@@ -33,7 +34,7 @@
                 <td><a href="{{document.url}}" target="_blank">{{document.url}}</a></td>
                 <td>{{document.craft.name}}</td>
                 <td><app-status [status]="document.status"></app-status></td>
-                <td>
+                <td alignFrozen="right" pFrozenColumn [frozen]="true">
                     <button pButton type="button" icon="pi pi-pencil" (click)="editDocument(document)"
                         class="p-button-rounded p-button-success mr-2"></button>
                     <button pButton type="button" icon="pi pi-trash" (click)="deleteDocument(document.id)"
@@ -44,19 +45,13 @@
     </p-table>
 </div>
 
-<p-dialog [(visible)]="documentDialog" [style]="{width: '100%', height: '100%'}" header="Agregar Documento" [modal]="true"
+
+<p-dialog [(visible)]="documentDialog" [style]="{width: '450px'}" header="Administrar Áreas" [modal]="true"
     styleClass="p-fluid">
-    <app-document-form 
-    [form]="documentForm" 
-    (cancel)="hideDialog()" 
-    (save)="onSubmit()"/>
-    
-    <ng-template pTemplate="footer">
-        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
-            (click)="hideDialog()"></button>
-        <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" (click)="onSubmit()"></button>
-    </ng-template>
+    <app-document-form [form]="documentForm" [document]="selectedDocument" [crafts]="crafts" [statuses]="statuses"
+        (save)="onSubmit($event)" (cancel)="hideDialog()"></app-document-form>
 </p-dialog>
+
 
 <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
 

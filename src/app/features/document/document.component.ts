@@ -79,16 +79,10 @@ export class DocumentComponent implements OnInit {
   ngOnInit() {
     this.loadCrafts();
     this.loadDocuments();
-    this.initForm();
   }
 
-  initForm(): void {
-    this.documentForm = new FormGroup({
-      craftId: new FormControl(null, [Validators.required]),
-      files: new FormControl([], [Validators.required]),
-      statusId: new FormControl(null),
-    });
-  }
+
+ 
 
   loadDocuments() {
     this.documentService.getDocuments().subscribe({
@@ -115,7 +109,8 @@ export class DocumentComponent implements OnInit {
     });
   }
 
-  onSubmit() {
+  onSubmit(form: FormGroup) {
+    this.documentForm = form;
     if (this.documentForm.valid) {
       if (this.isEditing) {
         this.updateDocument();
@@ -124,17 +119,12 @@ export class DocumentComponent implements OnInit {
       }
     } else {
       this.submitted = true;
-      console.log('Form is invalid');
-      Object.keys(this.documentForm.controls).forEach(key => {
-        const control = this.documentForm.get(key);
-        console.log(key, control?.errors);
-      })
       this.documentForm.markAsDirty();
     }
   }
 
   createDocument() {
-    const document = this.documentForm.value;console.log(document);
+    const document = this.documentForm.value;
     this.documentService.createDocument(document).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Document created successfully' });
@@ -165,12 +155,7 @@ export class DocumentComponent implements OnInit {
 
   editDocument(document: Document) {
     this.isEditing = true;
-    this.documentForm.patchValue({
-      ...document,
-      craftId: document?.craft?.id,
-      statusId: document?.status?.id
-    });
-    this.selectedDocument = document;
+    this.selectedDocument = { ...document };
     this.documentDialog = true;
   }
 
@@ -187,7 +172,9 @@ export class DocumentComponent implements OnInit {
     });
   }
 
-  openNew() {
+  openNew() {    
+    this.documentForm?.reset();
+
     this.submitted = false;
     this.documentDialog = true;
     this.selectedDocument = null;
