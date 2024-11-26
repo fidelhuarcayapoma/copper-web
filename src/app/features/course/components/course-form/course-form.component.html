@@ -22,6 +22,14 @@
                 La URL del banner es requerida
             </small>
         </div>
+        <div class="field">
+            <label for="duration" class="block mb-2">Duración:</label>
+            <input type="text" pInputText id="duration" formControlName="duration" placeholder="Ingrese la duración" class="w-full">
+            <small class="p-error" *ngIf="form?.get('duration')?.invalid && form.get('duration')?.touched">
+                La duración es requerida
+            </small>
+        </div>
+
 
     <div class="flex justify-end gap-2 mt-4">
         <button pButton type="button" label="Cancelar" (click)="onCancel()" class="p-button-text" >

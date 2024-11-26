@@ -75,7 +75,8 @@ export class CourseComponent implements OnInit {
       id: new FormControl(),
       name: new FormControl('', Validators.required),
       description: new FormControl('', Validators.required),
-      banner: new FormControl('', Validators.required)
+      banner: new FormControl('', Validators.required),
+      duration: new FormControl('', Validators.required),
     });
     this.courseService.getCourses().subscribe({
       next: (courses) => {

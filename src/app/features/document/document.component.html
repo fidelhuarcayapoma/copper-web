@@ -8,7 +8,7 @@
     <p-table #dt [value]="documents" [rows]="10" [paginator]="true" [scrollable]="true" 
         [globalFilterFields]="['name','draft.name','status.name']" [rowHover]="true" dataKey="id"
         currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} entradas"
-        [showCurrentPageReport]="true">
+        [showCurrentPageReport]="true" sortField="createdAt" [sortOrder]="-1">
         <ng-template pTemplate="caption">
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
                 <h5 class="m-0">Administrar Documentos</h5>
@@ -21,10 +21,10 @@
         </ng-template>
         <ng-template pTemplate="header">
             <tr>
-                <th>Nombre</th>
-                <th>URL</th>
-                <th>Manual</th>
-                <th>Estado</th>
+                <th pSortableColumn="name" >Nombre<p-sortIcon field="name"></p-sortIcon></th>
+                <th pSortableColumn="url">URL<p-sortIcon field="url"></p-sortIcon></th>
+                <th pSortableColumn="craft.name">Manual<p-sortIcon field="craft.name"></p-sortIcon></th>
+                <th pSortableColumn="status.name">Estado<p-sortIcon field="status.name"></p-sortIcon></th>
                 <th alignFrozen="right" pFrozenColumn [frozen]="true">Acciones</th>
             </tr>
         </ng-template>
@@ -46,7 +46,7 @@
 </div>
 
 
-<p-dialog [(visible)]="documentDialog" [style]="{width: '450px'}" header="Administrar Áreas" [modal]="true"
+<p-dialog [(visible)]="documentDialog" [style]="{width: '450px'}" header="Administrar Documentos" [modal]="true"
     styleClass="p-fluid">
     <app-document-form [form]="documentForm" [document]="selectedDocument" [crafts]="crafts" [statuses]="statuses"
         (save)="onSubmit($event)" (cancel)="hideDialog()"></app-document-form>

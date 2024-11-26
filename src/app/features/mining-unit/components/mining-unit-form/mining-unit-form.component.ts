@@ -17,8 +17,6 @@ import { CraftFormComponent } from '../../../craft/components/craft-form/craft-f
     CommonModule,
     ToolbarModule,
     ReactiveFormsModule,
-    StatusComponent,
-    CraftFormComponent,
   ],
   templateUrl: './mining-unit-form.component.html',
   styleUrl: './mining-unit-form.component.scss'

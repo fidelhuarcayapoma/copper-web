@@ -22,6 +22,7 @@ import { DropdownChangeEvent } from 'primeng/dropdown';
 import { FileUploadModule } from 'primeng/fileupload';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { DocumentFormComponent } from "./components/document-form/document-form.component";
+import { FileUtil } from '../../shared/utils/file-util';
 
 @Component({
   selector: 'app-document',
@@ -31,12 +32,10 @@ import { DocumentFormComponent } from "./components/document-form/document-form.
     ToolbarModule,
     ReactiveFormsModule,
     StatusComponent,
-    UploadComponent,
     FileUploadModule,
-    FileUploadComponent,
     ...PRIMENG_MODULES,
     DocumentFormComponent
-],
+  ],
   providers: [
     MessageService,
     ConfirmationService,
@@ -82,7 +81,7 @@ export class DocumentComponent implements OnInit {
   }
 
 
- 
+
 
   loadDocuments() {
     this.documentService.getDocuments().subscribe({
@@ -125,6 +124,8 @@ export class DocumentComponent implements OnInit {
 
   createDocument() {
     const document = this.documentForm.value;
+    document.name = document.name.split('.')[0] +'.'+ FileUtil.getFileExtensionFromUrlDrive(document.url);
+
     this.documentService.createDocument(document).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Document created successfully' });
@@ -138,8 +139,10 @@ export class DocumentComponent implements OnInit {
     });
   }
 
+
   updateDocument() {
-    const document = { ...this.documentForm.value, id: this.selectedDocument?.id };
+    let document = { ...this.documentForm.value, id: this.selectedDocument?.id };
+    document.name = document.name.split('.')[0] +'.'+ FileUtil.getFileExtensionFromUrlDrive(document.url);
     this.documentService.updateDocument(document).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Documento actualizado exitosamente' });
@@ -172,7 +175,7 @@ export class DocumentComponent implements OnInit {
     });
   }
 
-  openNew() {    
+  openNew() {
     this.documentForm?.reset();
 
     this.submitted = false;
