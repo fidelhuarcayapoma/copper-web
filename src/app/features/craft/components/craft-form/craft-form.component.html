@@ -15,7 +15,7 @@
     </div>
     <div class="field">
       <label for="status">Estado:</label>
-      <p-dropdown [options]="statuses" formControlName="statusId" optionLabel="description" optionValue="id" placeholder="Select Status" appendTo="body">
+      <p-dropdown [options]="statuses" formControlName="statusId" [showClear]="true"  optionLabel="description" optionValue="id" placeholder="Select Status" appendTo="body">
       </p-dropdown>
       <small class="p-error" *ngIf="submitted && form.get('statusId')?.invalid">Status is required.</small>
     </div>
