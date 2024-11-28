@@ -88,7 +88,9 @@ export class CraftComponent extends CrudComponent<Craft> implements OnInit {
     this.dialogVisible = true;
   }
 
-  saveCraft(craftData: any) {
+  saveCraft(form: FormGroup) {
+   const craftData = form.value;  
+
     if (this.selectedItem?.id) {
       this.craftService.updateCraft({ ...this.selectedItem, ...craftData }).subscribe({
         next: () => {
