@@ -6,7 +6,10 @@
     </div>
     <div class="field">
       <label for="equipment">Equipo:</label>
-      <p-dropdown [options]="equipments" formControlName="equipmentId" optionLabel="name" optionValue="id" [showClear]="true" placeholder="Select Equipment">
+      <p-dropdown [options]="equipments" formControlName="equipmentId" optionLabel="name" 
+      optionValue="id" [showClear]="true" placeholder="Seleccionar un Equipo" appendTo="body"
+      
+      >
       </p-dropdown>
       <small class="p-error" *ngIf="submitted && form.get('equipmentId')?.invalid">Equipment is required.</small>
     </div>
