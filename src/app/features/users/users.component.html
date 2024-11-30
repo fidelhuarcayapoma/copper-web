@@ -10,7 +10,7 @@
     </div>
     <p-table [value]="users" [paginator]="true" [rows]="5" [first]="first" [showCurrentPageReport]="true" 
         currentPageReportTemplate="{first} a {last} de {totalRecords}" responsiveLayout="stack" [breakpoint]="'670px'" 
-        [responsive]="true" (onPage)="pageChange($event)" [rowsPerPageOptions]="[10, 25, 50]">
+        [responsive]="true" (onPage)="pageChange($event)" [rowsPerPageOptions]="[10, 25, 50]" styleClass="p-datatable-sm">
         <ng-template pTemplate="header">
             <tr>
                 <th *ngFor="let col of columns" [pSortableColumn]="col.sortable ? col.field : ''">

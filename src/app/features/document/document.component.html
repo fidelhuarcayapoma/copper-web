@@ -8,7 +8,7 @@
     <p-table #dt [value]="documents" [rows]="10" [paginator]="true" [scrollable]="true" 
         [globalFilterFields]="['name','draft.name','status.name']" [rowHover]="true" dataKey="id"
         currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} entradas"
-        [showCurrentPageReport]="true" sortField="createdAt" [sortOrder]="-1">
+        [showCurrentPageReport]="true" sortField="createdAt" [sortOrder]="-1" styleClass="p-datatable-sm">
         <ng-template pTemplate="caption">
             <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
                 <h5 class="m-0">Administrar Documentos</h5>

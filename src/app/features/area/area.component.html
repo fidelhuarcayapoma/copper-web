@@ -11,7 +11,7 @@
     [globalFilterFields]="['name','miningUnit.name','status.name']" 
     [rowHover]="true" dataKey="id"
     currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} entradas" 
-    [showCurrentPageReport]="true">
+    [showCurrentPageReport]="true" styleClass="p-datatable-sm">
     <ng-template pTemplate="caption">
       <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
         <h5 class="m-0">Administrar Áreas</h5>
@@ -37,6 +37,17 @@
         </th>
         <th>Acciones</th>
       </tr>
+      <tr>
+        <th>
+            <p-columnFilter 
+                type="text" 
+                field="name" 
+                placeholder="Buscar..."
+                ariaLabel="Filtrar por nombre"
+                [showMatchModes]="false">
+            </p-columnFilter>
+        </th>
+
     </ng-template>
     <ng-template pTemplate="body" let-area>
       <tr>

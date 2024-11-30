@@ -6,47 +6,132 @@
     </ng-template>
   </p-toolbar>
 
-  <p-table #dt [value]="miningUnits" [rows]="10" [paginator]="true" [globalFilterFields]="['name','urlLogo']"
-    [rowHover]="true" dataKey="id" currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} entradas"
-    [showCurrentPageReport]="true">
-    <ng-template pTemplate="caption">
-      <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-        <h5 class="m-0">Administrar Unidades Mineras</h5>
-        <span class="block mt-2 md:mt-0 p-input-icon-left">
-          <i class="pi pi-search"></i>
-          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..."
-            class="w-full sm:w-auto" />
-        </span>
-      </div>
-    </ng-template>
-    <ng-template pTemplate="header">
-      <tr>
-        <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
-        <th pSortableColumn="urlLogo">Imagen <p-sortIcon field="urlLogo"></p-sortIcon></th>
-        <th pSortableColumn="urlLogo">URL Logo <p-sortIcon field="urlLogo"></p-sortIcon></th>
-        <th pSortableColumn="status.name">Estado <p-sortIcon field="status.name"></p-sortIcon></th>
-        <th>Acciones</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-miningUnit>
-      <tr>
-        <td>{{miningUnit.name}}</td>
-        <td style="width:14%; min-width:10rem;"><span class="p-column-title">Image</span>
-          <img [src]="miningUnit.urlLogo" [alt]="miningUnit.urlLogo" width="80" />
-        </td>
-        <td><a pTooltip="{{miningUnit.urlLogo}}" href="{{miningUnit.urlLogo}}"
-            target="_blank">{{truncateUrlLogo(miningUnit.urlLogo)}}</a></td>
-        <td><app-status [status]="miningUnit.status"></app-status></td>
+  <p-table 
+    #dt 
+    [value]="miningUnits" 
+    dataKey="id"
+    [rows]="10" 
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [paginator]="true"
+    [globalFilterFields]="['name', 'urlLogo', 'status.name']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+>
+<ng-template pTemplate="caption">
+  <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+    <h5 class="m-0">Administrar Unidades Mineras</h5>
+    <span class="block mt-2 md:mt-0 p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." class="w-full sm:w-auto" />
+    </span>
+  </div>
+</ng-template>
 
-        <td>
-          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"
-            (click)="editMiningUnit(miningUnit)"></button>
-          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
-            (click)="deleteSelectedMiningUnit(miningUnit)"></button>
-        </td>
-      </tr>
+    <ng-template pTemplate="header">
+        <tr>
+            <th style="width:22%">Nombre</th>
+            <th style="width:22%">Imagen</th>
+            <th style="width:22%">URL Logo</th>
+            <th style="width:22%">Estado</th>
+            <th style="width:12%">Acciones</th>
+        </tr>
+        <tr>
+            <th>
+                <p-columnFilter 
+                    type="text" 
+                    field="name" 
+                    placeholder="Buscar por nombre" 
+                    ariaLabel="Filtrar Nombre" 
+                    (input)="onColumnFilter(dt, 'name', $event)"
+                    />
+            </th>
+            <th>
+                <!-- No filter for image column -->
+            </th>
+            <th>
+                <p-columnFilter 
+                    type="text" 
+                    field="urlLogo" 
+                    placeholder="Buscar por URL" 
+                    ariaLabel="Filtrar URL" 
+                    (input)="onColumnFilter(dt, 'urlLogo', $event)"
+                    />
+            </th>
+            <th>
+                <p-columnFilter 
+                    field="status.id" 
+                    matchMode="equals" 
+                    [showMenu]="false">
+                    <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                        <p-dropdown 
+                            [options]="statuses" 
+                            (onChange)="filter($event.value)" 
+                            placeholder="Seleccionar estado" 
+                            [showClear]="true"
+                            appendTo="body"
+                            [ngModel]="value" 
+                            optionLabel="description"
+                            optionValue="id">
+                            <ng-template let-selectedOption pTemplate="selectedItem">
+                              <div class="flex align-items-center gap-2">
+                              
+                                <app-status [status]="selectedOption"></app-status>
+
+                            </div>
+                            </ng-template>
+                            <ng-template let-option pTemplate="item">
+                                <app-status [status]="option"></app-status>
+                            </ng-template>
+                        </p-dropdown>
+                    </ng-template>
+                </p-columnFilter>
+            </th>
+            <th>
+                <!-- No filter for actions column -->
+            </th>
+        </tr>
     </ng-template>
-  </p-table>
+
+    <ng-template pTemplate="body" let-miningUnit>
+        <tr>
+            <td>{{ miningUnit.name }}</td>
+            <td style="width:14%; min-width:10rem;">
+                <img [src]="miningUnit.urlLogo" [alt]="miningUnit.name" width="80" />
+            </td>
+            <td>
+                <a 
+                    pTooltip="{{miningUnit.urlLogo}}" 
+                    href="{{miningUnit.urlLogo}}" 
+                    target="_blank">
+                    {{ truncateUrlLogo(miningUnit.urlLogo) }}
+                </a>
+            </td>
+            <td><app-status [status]="miningUnit.status"></app-status></td>
+
+            <td>
+                <button 
+                    pButton 
+                    pRipple 
+                    icon="pi pi-pencil" 
+                    class="p-button-rounded p-button-success mr-2" 
+                    (click)="editMiningUnit(miningUnit)">
+                </button>
+                <button 
+                    pButton 
+                    pRipple 
+                    icon="pi pi-trash" 
+                    class="p-button-rounded p-button-warning" 
+                    (click)="deleteSelectedMiningUnit(miningUnit)">
+                </button>
+            </td>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="5">No se encontraron unidades mineras.</td>
+        </tr>
+    </ng-template>
+</p-table>
 </div>
 
 <p-dialog [(visible)]="miningUnitDialog" [style]="{width: '450px'}" header="Unidad Minera" [modal]="true"

@@ -8,7 +8,6 @@ import { CommonModule } from '@angular/common';
   selector: 'app-status',
   standalone: true,
   imports: [
-    StatusComponent,
     TagModule,
     CommonModule,
   ],

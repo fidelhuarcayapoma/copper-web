@@ -48,4 +48,5 @@ export const PRIMENG_MODULES = [
   DialogModule,
   TooltipModule,
   CardModule,
+  TagModule,
 ];
