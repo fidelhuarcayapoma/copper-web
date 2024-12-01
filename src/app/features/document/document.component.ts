@@ -23,18 +23,21 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { FileUploadComponent } from '../../shared/components/file-upload/file-upload.component';
 import { DocumentFormComponent } from "./components/document-form/document-form.component";
 import { FileUtil } from '../../shared/utils/file-util';
+import { CrudComponent } from '../../core/components/crud/crud';
+import { FORM_MODULES } from '../../form-config';
+import { TruncatePipe } from '../../shared/pipes/truncate.pipe';
 
 @Component({
   selector: 'app-document',
   standalone: true,
   imports: [
-    CommonModule,
+    ...FORM_MODULES,
     ToolbarModule,
-    ReactiveFormsModule,
     StatusComponent,
     FileUploadModule,
     ...PRIMENG_MODULES,
-    DocumentFormComponent
+    DocumentFormComponent,
+    TruncatePipe,
   ],
   providers: [
     MessageService,
@@ -43,13 +46,9 @@ import { FileUtil } from '../../shared/utils/file-util';
   templateUrl: './document.component.html',
   styleUrl: './document.component.scss'
 })
-export class DocumentComponent implements OnInit {
-  changeEquipment($event: DropdownChangeEvent) {
-    throw new Error('Method not implemented.');
-  }
-  changeArea($event: DropdownChangeEvent) {
-    throw new Error('Method not implemented.');
-  }
+export class DocumentComponent extends CrudComponent<Document> implements OnInit {
+
+  
   documents: Document[] = [];
   equipments: Equipment[] = [];
   areas: Area[] = [];
@@ -62,7 +61,6 @@ export class DocumentComponent implements OnInit {
 
   isEditing = false;
   documentDialog = false;
-  submitted = false;
 
   files: File[] = [];
 
@@ -71,30 +69,15 @@ export class DocumentComponent implements OnInit {
   totalSizePercent: number = 0;
 
   private config = inject(PrimeNGConfig);
-  private messageService = inject(MessageService);
   private documentService = inject(DocumentService);
   private craftService = inject(CraftService);
+  private statusService = inject(StatusService);
 
-  ngOnInit() {
+  override ngOnInit() {
+    super.ngOnInit();
+    this.loadStatuses();
     this.loadCrafts();
-    this.loadDocuments();
   }
-
-
-
-
-  loadDocuments() {
-    this.documentService.getDocuments().subscribe({
-      next: (data) => {
-        this.documents = data;
-      },
-      error: (error) => {
-        console.error('Error loading documents', error);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load documents' });
-      }
-    });
-  }
-
 
   loadCrafts() {
     this.craftService.getCrafts().subscribe({
@@ -104,6 +87,18 @@ export class DocumentComponent implements OnInit {
       error: (error) => {
         console.error('Error loading crafts', error);
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load crafts' });
+      }
+    });
+  }
+
+  loadStatuses() {
+    this.statusService.getAll().subscribe({
+      next: (data) => {
+        this.statuses = data;
+      },
+      error: (error) => {
+        console.error('Error loading statuses', error);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load statuses' });
       }
     });
   }
@@ -129,7 +124,7 @@ export class DocumentComponent implements OnInit {
     this.documentService.createDocument(document).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Document created successfully' });
-        this.loadDocuments();
+        this.loadItems();
         this.hideDialog();
       },
       error: (error) => {
@@ -146,7 +141,7 @@ export class DocumentComponent implements OnInit {
     this.documentService.updateDocument(document).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Documento actualizado exitosamente' });
-        this.loadDocuments();
+        this.loadItems();
         this.hideDialog();
       },
       error: (error) => {
@@ -162,47 +157,34 @@ export class DocumentComponent implements OnInit {
     this.documentDialog = true;
   }
 
-  deleteDocument(id: number) {
-    this.documentService.deleteDocument(id).subscribe({
-      next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Documento eliminado exitosamente' });
-        this.loadDocuments();
-      },
-      error: (error) => {
-        console.error('Error deleting document', error);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar el documento' });
-      }
-    });
-  }
-
-  openNew() {
-    this.documentForm?.reset();
-
-    this.submitted = false;
-    this.documentDialog = true;
-    this.selectedDocument = null;
-    this.isEditing = false;
-  }
-  hideDialog() {
-    this.isEditing = false;
-    this.documentDialog = false;
-    this.documentForm.reset();
-  }
-  onGlobalFilter(table: Table, event: Event) {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-  }
-
   truncateUrlLogo(url: string): string {
     if (url && url.length > 30) {
       return url.substring(0, 27) + '...';
     }
     return url;
   }
-
-  onTemplatedUpload() {
-    this.messageService.add({ severity: 'info', summary: 'Éxito', detail: 'Archivo subido', life: 3000 });
-  }
-
+  override loadItems(): void {
+    this.documentService.getDocuments().subscribe({
+      next: (data) => {
+        this.documents = data;
+      },
+      error: (error) => {
+        console.error('Error loading documents', error);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load documents' });
+      }
+    });
+  }  
+override deleteItem(id: number): void {
+  this.documentService.deleteDocument(id).subscribe({
+    next: () => {
+      this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Documento eliminado exitosamente' });
+      this.loadItems();
+    },
+    error: (error) => {
+      console.error('Error deleting document', error);
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar el documento' });
+    }
+  });}
 
 
 

@@ -27,17 +27,82 @@
                 <th pSortableColumn="status.name">Estado<p-sortIcon field="status.name"></p-sortIcon></th>
                 <th alignFrozen="right" pFrozenColumn [frozen]="true">Acciones</th>
             </tr>
+            <tr>
+                <th>
+                    <p-columnFilter type="text" field="name" placeholder="Buscar..." ariaLabel="Filtrar por nombre"
+                        (onChange)="onColumnFilter(dt, 'name', $event)" [showMatchModes]="false">
+                    </p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter type="text" field="url" placeholder="Buscar..." ariaLabel="Filtrar por url"
+                        (onChange)="onColumnFilter(dt, 'url', $event)" [showMatchModes]="false">
+                    </p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter field="craft.id" matchMode="equals" [showMenu]="false">
+                        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                            <p-dropdown 
+                                [options]="crafts" 
+                                (onChange)="filter($event.value)" 
+                                placeholder="Seleccionar manual" 
+                                [showClear]="true"
+                                appendTo="body"
+                                [ngModel]="value" 
+                                optionLabel="name"
+                                optionValue="id"
+                                [filter]="true"
+                                filterBy="name" 
+                                >
+                                <ng-template let-selectedOption pTemplate="selectedItem">
+                                <div class="flex align-items-center gap-2">
+                                    {{selectedOption.name}}
+                                </div>
+                                </ng-template>
+                                <ng-template let-option pTemplate="item">
+                                    {{option.name}}
+                                </ng-template>
+                            </p-dropdown>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter field="status.id" matchMode="equals" [showMenu]="false">
+                        <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                            <p-dropdown 
+                                [options]="statuses" 
+                                (onChange)="filter($event.value)" 
+                                placeholder="Seleccionar estado" 
+                                [showClear]="true"
+                                appendTo="body"
+                                [ngModel]="value" 
+                                optionLabel="description"
+                                optionValue="id">
+                                <ng-template let-selectedStatus pTemplate="selectedItem">
+                                <div class="flex align-items-center gap-2">
+                                    <app-status [status]="selectedStatus"></app-status>
+                                </div>
+                                </ng-template>
+                                <ng-template let-option pTemplate="item"> 
+                                    <app-status [status]="option"></app-status>
+                                </ng-template>
+                            </p-dropdown> 
+                        </ng-template>
+                    </p-columnFilter>
+
+                </th>
+                <th></th>
+            </tr>
+
         </ng-template>
         <ng-template pTemplate="body" let-document>
             <tr>
                 <td>{{document.name}}</td>
-                <td><a href="{{document.url}}" target="_blank">{{document.url}}</a></td>
-                <td>{{document.craft.name}}</td>
+                <td><a [pTooltip]="document.url" href="{{document.url}}" target="_blank">{{document.url | truncate}}</a></td>                <td>{{document.craft.name}}</td>
                 <td><app-status [status]="document.status"></app-status></td>
                 <td alignFrozen="right" pFrozenColumn [frozen]="true">
                     <button pButton type="button" icon="pi pi-pencil" (click)="editDocument(document)"
                         class="p-button-rounded p-button-success mr-2"></button>
-                    <button pButton type="button" icon="pi pi-trash" (click)="deleteDocument(document.id)"
+                    <button pButton type="button" icon="pi pi-trash" (click)="deleteItem(document.id)"
                         class="p-button-rounded p-button-danger"></button>
                 </td>
             </tr>
@@ -46,7 +111,7 @@
 </div>
 
 
-<p-dialog [(visible)]="documentDialog" [style]="{width: '450px'}" header="Administrar Documentos" [modal]="true"
+<p-dialog [(visible)]="dialogVisible" [style]="{width: '450px'}" header="Administrar Documentos" [modal]="true"
     styleClass="p-fluid">
     <app-document-form [form]="documentForm" [document]="selectedDocument" [crafts]="crafts" [statuses]="statuses"
         (save)="onSubmit($event)" (cancel)="hideDialog()"></app-document-form>

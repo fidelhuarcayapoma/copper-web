@@ -1,20 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { Table } from 'primeng/table';
+import { BaseTableComponent } from '../table/base-table.component';
 
 @Component({
   template: ''
 })
-export abstract class CrudComponent<T extends { id: number }> implements OnInit {
+export abstract class CrudComponent<T extends { id: number }> extends BaseTableComponent implements OnInit {
   items: T[] = [];
   selectedItem: T | null = null;
   submitted: boolean = false;
   dialogVisible: boolean = false;
 
-  constructor(
-    protected messageService: MessageService,
-    protected confirmationService: ConfirmationService
-  ) {}
+  protected messageService = inject(MessageService);
+  protected confirmationService = inject(ConfirmationService);
+  constructor() {
+    super();
+  }
 
   ngOnInit() {
     this.loadItems();
@@ -32,10 +34,6 @@ export abstract class CrudComponent<T extends { id: number }> implements OnInit 
   hideDialog() {
     this.dialogVisible = false;
     this.submitted = false;
-  }
-
-  onGlobalFilter(table: Table, event: Event) {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
   protected showSuccessMessage(detail: string) {

@@ -44,9 +44,83 @@
                 field="name" 
                 placeholder="Buscar..."
                 ariaLabel="Filtrar por nombre"
+                (input)="onColumnFilter(dt, 'name', $event)"
                 [showMatchModes]="false">
             </p-columnFilter>
+
         </th>
+        <th>
+          <p-columnFilter 
+              field="miningUnit.id" 
+              matchMode="equals" 
+              [showMenu]="false">
+              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                  <p-dropdown 
+                      [options]="miningUnits" 
+                      (onChange)="filter($event.value)"
+                      placeholder="Seleccionar unidad minera"
+                      [showClear]="true"
+                      appendTo="body"
+                      [ngModel]="value" 
+                      optionLabel="name"
+                      optionValue="id">
+                      <ng-template let-selectedOption pTemplate="selectedItem">
+                      <div class="flex align-items-center gap-2">
+                          <img src="{{selectedOption.urlLogo}}" style="width: 18px" />
+                          <div>{{ selectedOption.name }}</div>
+                      </div>
+                      </ng-template>
+                      <ng-template let-option pTemplate="item">
+                          <div class="flex align-items-center gap-2">
+                              <img src="{{option.urlLogo}}" style="width: 18px" />
+                              <div>{{ option.name }}</div>
+                          </div>
+                      </ng-template>
+                  </p-dropdown>
+              </ng-template>
+          </p-columnFilter>
+      </th>
+      <th>
+        <p-columnFilter 
+            field="status.id" 
+            matchMode="equals" 
+            [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                <p-dropdown 
+                    [options]="statuses" 
+                    (onChange)="filter($event.value)" 
+                    placeholder="Seleccionar estado" 
+                    [showClear]="true"
+                    appendTo="body"
+                    [ngModel]="value" 
+                    optionLabel="description"
+                    optionValue="id">
+                    <ng-template let-selectedStatus pTemplate="selectedItem">
+                    <div class="flex align-items-center gap-2">
+                    
+                        <app-status [status]="selectedStatus"></app-status>
+
+                    </div>
+                    </ng-template>
+                    <ng-template let-option pTemplate="item">
+                        <app-status [status]="option"></app-status>
+                    </ng-template>
+                </p-dropdown>
+            </ng-template>
+        </p-columnFilter>
+    </th>
+        <th>
+          <p-columnFilter 
+              type="date" 
+              field="createdAt" 
+              placeholder="Buscar..."
+              ariaLabel="Filtrar por fecha de adición"
+              (onChange)="onColumnFilter(dt, 'createdAt', $event)"
+              [showMatchModes]="false">
+          </p-columnFilter>
+        </th>
+        <th></th>
+      </tr>
 
     </ng-template>
     <ng-template pTemplate="body" let-area>

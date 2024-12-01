@@ -11,6 +11,7 @@ import { Table } from 'primeng/table';
 import { Status } from '../../shared/interfaces/status.interface';
 import { StatusService } from '../../shared/service/status.service';
 import { MiningUnitFormComponent } from './components/mining-unit-form/mining-unit-form.component';
+import { BaseTableComponent } from '../../core/components/table/base-table.component';
 
 @Component({
   selector: 'app-mining-unit',
@@ -27,7 +28,7 @@ import { MiningUnitFormComponent } from './components/mining-unit-form/mining-un
   templateUrl: './mining-unit.component.html',
   styleUrl: './mining-unit.component.scss'
 })
-export class MiningUnitComponent implements OnInit {
+export class MiningUnitComponent extends BaseTableComponent implements OnInit {
   miningUnits: MiningUnit[] = [];
   miningUnitForm!: FormGroup;
   miningUnitDialog: boolean = false;
@@ -41,7 +42,9 @@ export class MiningUnitComponent implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private statusService: StatusService,
-  ) { }
+  ) { 
+    super();
+  }
 
   ngOnInit() {
     this.loadMiningUnits();
@@ -170,16 +173,7 @@ export class MiningUnitComponent implements OnInit {
     return index;
   }
 
-  onGlobalFilter(table: Table, event: Event) {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-  }
-  onColumnFilter(dt: Table, field: string, event: any) {
-    if (field === 'name' || field === 'urlLogo') {
-      dt.filter(event.target.value, field, 'contains');
-    } else if (field === 'status.name') {
-      dt.filter(event.value, field, 'equals');
-    }
-  }
+
   truncateUrlLogo(url: string): string {
     if (url && url.length > 30) {
       return url.substring(0, 27) + '...';

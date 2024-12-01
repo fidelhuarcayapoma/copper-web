@@ -32,6 +32,71 @@
         <th pSortableColumn="status.name">Estado <p-sortIcon field="status.name"></p-sortIcon></th>
         <th>Acciones</th>
       </tr>
+      <tr>
+        <th>
+          <p-columnFilter type="text" field="name" placeholder="Buscar..." ariaLabel="Filtrar por nombre"
+            (onChange)="onColumnFilter(dt, 'name', $event)" [showMatchModes]="false">
+          </p-columnFilter>
+        </th>
+        <th>
+          <p-columnFilter field="area.id" matchMode="equals" [showMenu]="false">
+            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+              <p-dropdown 
+                  [options]="areas" 
+                  (onChange)="filter($event.value)" 
+                  placeholder="Seleccionar área" 
+                  [showClear]="true"
+                  appendTo="body"
+                  [ngModel]="value" 
+                  optionLabel="name"
+                  optionValue="id"
+                  [filter]="true"
+                  filterBy="name" 
+                  >
+                  <ng-template let-selectedArea pTemplate="selectedItem">
+                  <div class="flex align-items-center gap-2">
+                      {{selectedArea.name}}
+                  </div>
+                  </ng-template>
+                  <ng-template let-option pTemplate="item">
+                      {{option.name}}
+                  </ng-template>
+              </p-dropdown>
+            </ng-template>
+          </p-columnFilter>
+        </th>
+        <th>
+          <p-columnFilter 
+              field="status.id" 
+              matchMode="equals" 
+              [showMenu]="false">
+              <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                  <p-dropdown 
+                      [options]="statuses" 
+                      (onChange)="filter($event.value)" 
+                      placeholder="Seleccionar estado" 
+                      [showClear]="true"
+                      appendTo="body"
+                      [ngModel]="value" 
+                      optionLabel="description"
+                      optionValue="id">
+                      <ng-template let-selectedStatus pTemplate="selectedItem">
+                      <div class="flex align-items-center gap-2">
+                      
+                          <app-status [status]="selectedStatus"></app-status>
+  
+                      </div>
+                      </ng-template>
+                      <ng-template let-option pTemplate="item">
+                          <app-status [status]="option"></app-status>
+                      </ng-template>
+                  </p-dropdown>
+              </ng-template>
+          </p-columnFilter>
+      </th>
+        <th></th>
+      </tr>
+
     </ng-template>
     <ng-template pTemplate="body" let-equipment>
       <tr>
@@ -49,7 +114,7 @@
   </p-table>
 </div>
 
-<p-dialog [(visible)]="equipmentDialog" [style]="{width: '450px'}" header="Administrar Equipos" [modal]="true"
+<p-dialog [(visible)]="dialogVisible" [style]="{width: '450px'}" header="Administrar Equipos" [modal]="true"
   styleClass="p-fluid">
   <app-equipment-form [form]="equipmentForm" [equipment]="selectedEquipment" [areas]="areas" [statuses]="statuses"
     (save)="saveEquipment($event)" (cancel)="hideDialog()"></app-equipment-form>

@@ -8,6 +8,7 @@ import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angula
 import { DialogService } from 'primeng/dynamicdialog';
 import { CourseFormComponent } from './components/course-form/course-form.component';
 import { CourseService } from './services/course.service';
+import { CrudComponent } from '../../core/components/crud/crud';
 @Component({
   selector: 'app-course',
   standalone: true,
@@ -26,8 +27,7 @@ import { CourseService } from './services/course.service';
   templateUrl: './course.component.html',
   styleUrl: './course.component.scss'
 })
-export class CourseComponent implements OnInit {
-  items = new Array(10);
+export class CourseComponent extends CrudComponent<Course>  implements OnInit {
 
   nodes!: TreeNode[];
   courses: Course[] = [];
@@ -70,7 +70,7 @@ export class CourseComponent implements OnInit {
     this.showDialog = false;
     this.courseForm.reset();
   }
-  ngOnInit() {
+  override ngOnInit() {
     this.courseForm = new FormGroup({
       id: new FormControl(),
       name: new FormControl('', Validators.required),
@@ -78,6 +78,9 @@ export class CourseComponent implements OnInit {
       banner: new FormControl('', Validators.required),
       duration: new FormControl('', Validators.required),
     });
+
+  }
+  override loadItems(): void {
     this.courseService.getCourses().subscribe({
       next: (courses) => {
         this.courses = courses;
@@ -85,6 +88,17 @@ export class CourseComponent implements OnInit {
       }
 
     });
-
+  }
+  override deleteItem(id: number): void {
+    this.courseService.deleteCourse(id).subscribe({
+      next: () => {
+        this.loadItems();
+        this.showSuccessMessage('Curso Eliminado');
+      },
+      error: (error) => {
+        console.error('Error deleting course', error);
+        this.showErrorMessage('Error al eliminar el curso');
+      }
+    });
   }
 }

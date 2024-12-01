@@ -17,15 +17,15 @@ import { CrudComponent } from '../../core/components/crud/crud';
 import { AreaService } from '../area/services/area.service';
 import { MiningUnitService } from '../mining-unit/services/mining-unit.service';
 import { CraftFormComponent } from './components/craft-form/craft-form.component';
+import { FORM_MODULES } from '../../form-config';
 
 @Component({
   selector: 'app-craft',
   standalone: true,
   imports: [
     ...PRIMENG_MODULES,
-    CommonModule,
+    ...FORM_MODULES,
     ToolbarModule,
-    ReactiveFormsModule,
     StatusComponent,
     CraftFormComponent,
   ],
@@ -42,7 +42,7 @@ export class CraftComponent extends CrudComponent<Craft> implements OnInit {
   private statusService = inject(StatusService);
 
   constructor() {
-    super(inject(MessageService), inject(ConfirmationService));
+    super();
   }
 
   override ngOnInit() {

@@ -15,15 +15,16 @@ import { Table } from 'primeng/table';
 import { MiningUnitService } from '../mining-unit/services/mining-unit.service';
 import { MiningUnit } from '../mining-unit/interfaces/mining-unit.interface';
 import { EquipmentFormComponent } from './components/equipment-form/equipment-form.component';
+import { CrudComponent } from '../../core/components/crud/crud';
+import { FORM_MODULES } from '../../form-config';
 
 @Component({
   selector: 'app-equipment',
   standalone: true,
   imports: [
     ...PRIMENG_MODULES,
-    CommonModule,
+    ...FORM_MODULES,
     ToolbarModule,
-    ReactiveFormsModule,
     StatusComponent,
     EquipmentFormComponent,
   ], providers: [MessageService, ConfirmationService],
@@ -31,7 +32,8 @@ import { EquipmentFormComponent } from './components/equipment-form/equipment-fo
   templateUrl: './equipment.component.html',
   styleUrl: './equipment.component.scss'
 })
-export class EquipmentComponent {
+export class EquipmentComponent extends CrudComponent<Equipment> {
+
   equipments: Equipment[] = [];
   areas: Area[] = [];
   statuses: Status[] = [];
@@ -39,23 +41,23 @@ export class EquipmentComponent {
 
   equipmentForm!: FormGroup;
   equipmentDialog: boolean = false;
-  submitted: boolean = false;
   selectedEquipment: Equipment | null = null;
   constructor(
     private equipmentService: EquipmentService,
     private areaService: AreaService,
     private statusService: StatusService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService,
     private miningUnitService: MiningUnitService,
-  ) { }
+  ) { 
+    super();
+  }
 
-  ngOnInit() {
+  override ngOnInit() {
     this.loadAreas();
     this.loadEquipment();
     this.loadStatuses();
     this.initForm();
   }
+
 
   initForm() {
     this.equipmentForm = new FormGroup({
@@ -98,11 +100,7 @@ export class EquipmentComponent {
     });
   }
 
-  openNew() {
-    this.submitted = false;
-    this.equipmentDialog = true;
-    this.selectedEquipment = null;
-  }
+ 
 
   deleteEquipment(equipment: any) {
     this.confirmationService.confirm({
@@ -132,12 +130,6 @@ export class EquipmentComponent {
     });
     this.equipmentDialog = true;
     this.selectedEquipment = equipment;
-  }
-
-  hideDialog() {
-    this.equipmentDialog = false;
-    this.submitted = false;
-    this.initForm();
   }
 
   saveEquipment(form: FormGroup) {
@@ -187,9 +179,6 @@ export class EquipmentComponent {
     return index;
   }
 
-  onGlobalFilter(table: Table, event: Event) {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-  }
 
   changeMiningUnit(event: any) {
     this.areaService.getAreasByMiningUnitId(event.value).subscribe({
@@ -200,5 +189,12 @@ export class EquipmentComponent {
         console.error('Error loading areas', error);
       }
     });
+  }
+
+  override loadItems(): void {
+    this.loadEquipment();
+  }
+  override deleteItem(id: number): void {
+    this.deleteEquipment(id);
   }
 }

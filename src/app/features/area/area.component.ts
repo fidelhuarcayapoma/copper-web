@@ -15,15 +15,16 @@ import { StatusComponent } from '../../shared/components/status/status.component
 import { Table } from 'primeng/table';
 import { CrudComponent } from '../../core/components/crud/crud';
 import { AreaFormComponent } from './components/area-form/area-form.component';
+import { FORM_MODULES } from '../../form-config';
 
 @Component({
   selector: 'app-area',
   standalone: true,
   imports: [
     ...PRIMENG_MODULES,
-    CommonModule,
+    ...FORM_MODULES,
     ToolbarModule,
-    ReactiveFormsModule,
+   
     StatusComponent,
     AreaFormComponent,
   ],
@@ -40,7 +41,7 @@ export class AreaComponent extends CrudComponent<Area> implements OnInit {
   private statusService = inject(StatusService);
 
   constructor() {
-    super(inject(MessageService), inject(ConfirmationService));
+    super();
   }
 
   override ngOnInit() {
