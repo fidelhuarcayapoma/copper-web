@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { MessageService, TreeNode } from 'primeng/api';
+import { ConfirmationService, MessageService, TreeNode } from 'primeng/api';
 import { PRIMENG_MODULES } from '../../primeng.imports';
 import { TreeModule } from 'primeng/tree';
 import { Course } from './interfaces/course.interface';
@@ -23,11 +23,12 @@ import { CrudComponent } from '../../core/components/crud/crud';
     DialogService,
     MessageService,
     CourseService,
+    ConfirmationService,
   ],
   templateUrl: './course.component.html',
   styleUrl: './course.component.scss'
 })
-export class CourseComponent extends CrudComponent<Course>  implements OnInit {
+export class CourseComponent  implements OnInit {
 
   nodes!: TreeNode[];
   courses: Course[] = [];
@@ -35,7 +36,10 @@ export class CourseComponent extends CrudComponent<Course>  implements OnInit {
   courseForm!: FormGroup;
   dialogService = inject(DialogService);
   courseService = inject(CourseService);
+  confirmationService = inject(ConfirmationService);
   isLoading = true;
+
+  items = new Array(5);
 
 
   showAddCourseDialog() {
@@ -70,7 +74,7 @@ export class CourseComponent extends CrudComponent<Course>  implements OnInit {
     this.showDialog = false;
     this.courseForm.reset();
   }
-  override ngOnInit() {
+  ngOnInit() {
     this.courseForm = new FormGroup({
       id: new FormControl(),
       name: new FormControl('', Validators.required),
@@ -78,9 +82,9 @@ export class CourseComponent extends CrudComponent<Course>  implements OnInit {
       banner: new FormControl('', Validators.required),
       duration: new FormControl('', Validators.required),
     });
-
+    this.loadCourses();
   }
-  override loadItems(): void {
+  loadCourses(): void {
     this.courseService.getCourses().subscribe({
       next: (courses) => {
         this.courses = courses;
@@ -89,16 +93,5 @@ export class CourseComponent extends CrudComponent<Course>  implements OnInit {
 
     });
   }
-  override deleteItem(id: number): void {
-    this.courseService.deleteCourse(id).subscribe({
-      next: () => {
-        this.loadItems();
-        this.showSuccessMessage('Curso Eliminado');
-      },
-      error: (error) => {
-        console.error('Error deleting course', error);
-        this.showErrorMessage('Error al eliminar el curso');
-      }
-    });
-  }
+
 }
