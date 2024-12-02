@@ -9,6 +9,8 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { CourseFormComponent } from './components/course-form/course-form.component';
 import { CourseService } from './services/course.service';
 import { CrudComponent } from '../../core/components/crud/crud';
+import { StatusService } from '../../shared/service/status.service';
+import { Status } from '../../shared/interfaces/status.interface';
 @Component({
   selector: 'app-course',
   standalone: true,
@@ -37,17 +39,23 @@ export class CourseComponent  implements OnInit {
   dialogService = inject(DialogService);
   courseService = inject(CourseService);
   confirmationService = inject(ConfirmationService);
+  statusService = inject(StatusService);
   isLoading = true;
 
   items = new Array(5);
-
+  statuses : Status[] = []
 
   showAddCourseDialog() {
     this.showDialog = true;
   }
   editCourse(course: Course) {
     this.showDialog = true;
-    this.courseForm.patchValue(course);
+    this.courseForm.patchValue(
+      {
+        ...course,
+        statusId: course?.status?.id,
+      }
+    );
   }
 
   save(event: any) {
@@ -81,8 +89,10 @@ export class CourseComponent  implements OnInit {
       description: new FormControl('', Validators.required),
       banner: new FormControl('', Validators.required),
       duration: new FormControl('', Validators.required),
+      statusId: new FormControl(null),
     });
     this.loadCourses();
+    this.loadStatuses();
   }
   loadCourses(): void {
     this.courseService.getCourses().subscribe({
@@ -92,6 +102,14 @@ export class CourseComponent  implements OnInit {
       }
 
     });
+  }
+
+  loadStatuses(): void {
+    this.statusService.getAll().subscribe({
+      next: (statuses) => {
+        this.statuses = statuses;
+      }
+    })
   }
 
 }

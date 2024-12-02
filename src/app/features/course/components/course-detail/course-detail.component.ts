@@ -1,21 +1,22 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CourseService } from '../../services/course.service';
-import { VideoService } from '../../services/video.service';
+import { ResourceService } from '../../services/resource.service';
 import { Course } from '../../interfaces/course.interface';
 import { ConfirmationService, MenuItem, MessageService, TreeNode } from 'primeng/api';
 import { PRIMENG_MODULES } from '../../../../primeng.imports';
 import { TreeModule } from 'primeng/tree';
 import { DividerModule } from 'primeng/divider';
 import { CommonModule } from '@angular/common';
-import { Video } from '../../interfaces/video.interfsce';
 import { TopicService } from '../../services/topic.service';
 import { TopicFormComponent } from '../topic-form/topic-form.component';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { SafePipe } from '../../../../core/pipes/safe-pipe.pipe';
 import { ContextMenuModule } from 'primeng/contextmenu';
-import { VideoFormComponent } from '../video-form/video-form.component';
 import { DialogService } from 'primeng/dynamicdialog';
+import { ResourceFormComponent } from '../resource-form/resource-form.component';
+import { Resource } from '../../interfaces/video.interfsce';
+import { ResourceCode } from '../../../../shared/common/resource-code';
 @Component({
   selector: 'app-course-detail',
   standalone: true,
@@ -27,11 +28,11 @@ import { DialogService } from 'primeng/dynamicdialog';
     TopicFormComponent,
     SafePipe,
     ContextMenuModule,
-    VideoFormComponent,
+    ResourceFormComponent,
   ],
   providers: [
     ConfirmationService,
-    VideoService,
+    ResourceService,
     CourseService,
     TopicService,
     MessageService,
@@ -43,7 +44,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 })
 export class CourseDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  videoService = inject(VideoService);
+  resourceService = inject(ResourceService);
   courseService = inject(CourseService);
   topicService = inject(TopicService);
   messageService = inject(MessageService);
@@ -52,7 +53,7 @@ export class CourseDetailComponent implements OnInit {
   courseId: number | null = null;
   nodes!: TreeNode[];
   course: Course | null = null;
-  videos: Video[] = [];
+  resources: Resource[] = [];
   items = new Array(5);
   loading = true;
 
@@ -60,11 +61,12 @@ export class CourseDetailComponent implements OnInit {
   contextMenuItems: MenuItem[] = [];
   selectedNode: TreeNode | null = null;
   showVideoFormDialog = false;
-  videoForm!: FormGroup;
+  resourceForm!: FormGroup;
 
   showDialog = false;
   showVideoDialog = false;
   selectedVideo: any = null;
+  resourceCode: ResourceCode = ResourceCode.FILE;
   ngOnInit(): void {
     this.courseId = Number(this.route.snapshot.paramMap?.get('id'));
     if (!this.courseId) {
@@ -78,7 +80,7 @@ export class CourseDetailComponent implements OnInit {
       name: new FormControl(null, [Validators.required]),
     });
 
-    this.videoForm = new FormGroup({
+    this.resourceForm = new FormGroup({
       title: new FormControl(null, [Validators.required]),
       url: new FormControl(null, [Validators.required]),
     });
@@ -106,17 +108,17 @@ export class CourseDetailComponent implements OnInit {
     if (node.children.length === 0) {
       const topicId = parseInt(node.key);
 
-      this.videoService.getVideosByCourseId(topicId).subscribe(
-        videos => {
-          node.children = videos.map(video => ({
-            key: `video-${video.id}`,
-            label: video.title,
-            type: 'video',
-            data: this.convertVideoUrl(video.url),
-            icon: 'pi pi-fw pi-vimeo',
-
+      this.resourceService.getVideosByCourseId(topicId).subscribe(
+        resources => {
+          node.children = resources.map(resource => ({
+            key: `video-${resource.id}`,
+            label: resource.title,
+            type: resource.resourceType.code?.toLocaleLowerCase(),
+            data: this.convertVideoUrl(resource.url),
+            icon: `pi pi-fw pi-${resource.resourceType.code === 'VIDEO' ? 'vimeo' : 'file-pdf'}`,
             leaf: true
-          }));
+          }
+          ));
         },
         error => {
           this.messageService.add({
@@ -195,7 +197,18 @@ export class CourseDetailComponent implements OnInit {
         icon: 'pi pi-video',
         command: () => {
           if (this.selectedNode && !this.selectedNode.type) {
+            this.resourceCode =  ResourceCode.VIDEO;
             this.showAddVideoDialog();
+          }
+        }
+      },
+      {
+        label: 'Agregar Archivo',
+        icon: 'pi pi-file',
+        command: () => {
+          if (this.selectedNode && !this.selectedNode.type) {
+            this.resourceCode =  ResourceCode.FILE;
+            this.showAddFileDialog();
           }
         }
       },
@@ -219,56 +232,78 @@ export class CourseDetailComponent implements OnInit {
   }
 
   showAddVideoDialog() {
-    this.videoForm.reset();
+    this.resourceForm.reset();
+    this.showVideoFormDialog = true;
+  }
+  showAddFileDialog() {
+    this.resourceForm.reset();
     this.showVideoFormDialog = true;
   }
   closeVideoFormDialog() {
     this.showVideoFormDialog = false;
-    this.videoForm.reset();
+    this.resourceForm.reset();
   }
 
-  saveVideo(event: any) {
-    if (this.videoForm.invalid || !this.selectedNode?.key) {
+  saveResource(form: FormGroup) {
+    if (form.invalid || !this.selectedNode?.key) {
       return
-    }
-    const videoData = {
-      ...this.videoForm.value,
+    } 
+    const resourceData = {
+      ...form.value,
       topicId: parseInt(this.selectedNode.key)
     };
 
-    this.videoService.createVideo(videoData).subscribe(
-      (newVideo) => {
-        // Agregar el nuevo video al árbol
-        if (this.selectedNode) {
-          const videoNode = {
-            key: `video-${newVideo.id}`,
-            label: newVideo.title,
-            type: 'video',
-            data: this.convertVideoUrl(newVideo.url),
-            icon: 'pi pi-fw pi-vimeo',
+    this.resourceService.createResource(resourceData).subscribe({
+      next: (res) => {
+       
+        console.log(res);
+       
+        let message = '';
+        let videoNode = null;
+        if (this.resourceCode === ResourceCode.FILE) {
+          message = 'Archivo agregado correctamente';
+          videoNode = {
+            key: `file-${res.id}`,
+            label: res.title,
+            type: res.resourceType.code?.toLocaleLowerCase(),
+            data: res.url,
+            icon: 'pi pi-fw pi-file-pdf',
             leaf: true
           };
 
+        } else if (this.resourceCode === ResourceCode.VIDEO) {
+          message = 'Video agregado correctamente';
+          videoNode = {
+            key: `video-${res.id}`,
+            label: res.title,
+            type: res.resourceType.code?.toLocaleLowerCase(),
+            data: this.convertVideoUrl(res.url),
+            icon: 'pi pi-fw pi-vimeo',
+            leaf: true
+          };
+        }
+        if (this.selectedNode && videoNode) {
+   
+
           this.selectedNode.children = [...(this.selectedNode.children || []), videoNode];
         }
-
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
-          detail: 'Video agregado correctamente'
+          detail: message
         });
 
         this.showVideoFormDialog = false;
-        this.videoForm.reset();
+        this.resourceForm.reset();
       },
-      error => {
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
           detail: 'Error al agregar el video'
         });
       }
-    );
+    });
 
   }
 

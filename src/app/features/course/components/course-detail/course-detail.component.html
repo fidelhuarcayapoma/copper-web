@@ -32,6 +32,10 @@
         <ng-template let-node pTemplate="default">
             <div class="flex align-items-center gap-2">
                 <i *ngIf="node.type === 'video'" class="pi pi-video"></i>
+                <i *ngIf="node.type === 'folder'" class="pi pi-folder"></i>
+                <i *ngIf="node.type === 'document'" class="pi pi-file-word"></i>
+                <i *ngIf="node.type === 'pdf'" class="pi pi-file-pdf"></i>
+                <i *ngIf="node.type === 'file'" class="pi pi-file"></i>
                 <span [class.font-bold]="!node.type">{{ node.label }}</span>
             </div>
         </ng-template>
@@ -79,11 +83,11 @@
 
 
 
-<p-dialog header="Agregar Video" 
+<p-dialog header="{{resourceCode === 'VIDEO' ? 'Agregar Video' : 'Agregar Archivo'}}" 
           [(visible)]="showVideoFormDialog" 
           [modal]="true" [responsive]="true"
     [style]="{width: '450px'}" styleClass="p-fluid">
-    <app-video-form [form]="videoForm" (cancel)="closeVideoFormDialog()" (save)="saveVideo($event)"/>
+    <app-resource-form [form]="resourceForm" (cancel)="closeVideoFormDialog()" (save)="saveResource($event)"/>
 </p-dialog>
 
 <p-confirmDialog />

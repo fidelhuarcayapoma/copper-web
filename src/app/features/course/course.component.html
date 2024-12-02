@@ -37,7 +37,7 @@
 
 <p-dialog header="Agregar Curso" [(visible)]="showDialog" [modal]="true" [responsive]="true"
     [style]="{width: '450px'}" styleClass="p-fluid">
-    <app-course-form [form]="courseForm" *ngIf="showDialog" (cancel)="close()"
+    <app-course-form [form]="courseForm" [statuses]="statuses"  *ngIf="showDialog" (cancel)="close()"
         (save)="save($event)"/>
 </p-dialog>
 

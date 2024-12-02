@@ -4,6 +4,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { PRIMENG_MODULES } from '../../../../primeng.imports';
 import { MessageService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
+import { Status } from '../../../../shared/interfaces/status.interface';
 
 @Component({
   selector: 'app-course-form',
@@ -21,6 +22,7 @@ export class CourseFormComponent {
   @Input() form !: FormGroup;
   @Input() submitted !: boolean;
   @Input() showDialog !: boolean;
+  @Input() statuses : Status[] = []; 
 
   @Output() save = new EventEmitter<any>();
   @Output() cancel = new EventEmitter<void>();

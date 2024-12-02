@@ -1,15 +1,15 @@
 <form [formGroup]="form" (ngSubmit)="onSave()">
     <div class="field">
         <label for="title">Título</label>
-        <input pInputText id="title" formControlName="title" />
+        <input pInputText id="title" formControlName="title" placeholder="Ingrese el título" />
         <small class="p-error" *ngIf="form.get('title')?.invalid && form.get('title')?.touched">
             El título es requerido
         </small>
     </div>
 
     <div class="field">
-        <label for="url">URL del Video</label>
-        <input pInputText id="url" formControlName="url" />
+        <label for="url">URL del Recurso</label>
+        <input pInputText id="url" formControlName="url" placeholder="Ingrese la URL" />
         <small class="p-error" *ngIf="form.get('url')?.invalid && form.get('url')?.touched">
             Ingrese una URL válida
         </small>

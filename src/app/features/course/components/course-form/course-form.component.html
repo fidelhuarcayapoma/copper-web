@@ -29,6 +29,13 @@
                 La duración es requerida
             </small>
         </div>
+        <div class="field">
+            <label for="status" class="block mb-2">Estado:</label>
+            <p-dropdown [options]="statuses" formControlName="statusId" placeholder="Seleccione un Estado"
+            [showClear]="true" optionLabel="description" optionValue="id">
+            
+            </p-dropdown>
+        </div>
 
 
     <div class="flex justify-end gap-2 mt-4">

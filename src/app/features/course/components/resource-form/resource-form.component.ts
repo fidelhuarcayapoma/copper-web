@@ -1,21 +1,19 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
+import { FORM_MODULES } from '../../../../form-config';
 import { PRIMENG_MODULES } from '../../../../primeng.imports';
-import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-video-form',
+  selector: 'app-resource-form',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
-    CommonModule,
     ...PRIMENG_MODULES,
-
+    ...FORM_MODULES,
   ],
-  templateUrl: './video-form.component.html',
-  styleUrl: './video-form.component.scss'
+  templateUrl: './resource-form.component.html',
+  styleUrl: './resource-form.component.scss'
 })
-export class VideoFormComponent {
+export class ResourceFormComponent {
   @Input() form !: FormGroup;
   @Input() submitted !: boolean;
   @Input() showDialog !: boolean;
