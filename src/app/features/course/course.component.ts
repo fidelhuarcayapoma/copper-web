@@ -11,6 +11,7 @@ import { CourseService } from './services/course.service';
 import { CrudComponent } from '../../core/components/crud/crud';
 import { StatusService } from '../../shared/service/status.service';
 import { Status } from '../../shared/interfaces/status.interface';
+import { StatusComponent } from "../../shared/components/status/status.component";
 @Component({
   selector: 'app-course',
   standalone: true,
@@ -19,8 +20,9 @@ import { Status } from '../../shared/interfaces/status.interface';
     TreeModule,
     CommonModule,
     ReactiveFormsModule,
-    CourseFormComponent
-  ],
+    CourseFormComponent,
+    StatusComponent
+],
   providers: [
     DialogService,
     MessageService,
@@ -60,9 +62,13 @@ export class CourseComponent  implements OnInit {
 
   save(event: any) {
     const course = event.value;
-    const courseId = course.id;
+    const courseId = course?.id;
+    if(this.courseForm.invalid) {
+      this.courseForm.markAllAsTouched();
+      return;
+    }
   
-    if (this.courseForm.valid) {
+    if (!courseId) {
       this.courseService.createCourse(course).subscribe((newCourse) => {
         const index = this.courses.findIndex(c => c.id === courseId);
         if (index !== -1) {
@@ -70,6 +76,14 @@ export class CourseComponent  implements OnInit {
         } else {
           this.courses.push(newCourse);  // Agrega el nuevo curso
         }
+        this.courseForm.reset();
+        this.isLoading = false;
+      });
+      this.showDialog = false;
+    }else {
+      this.courseService.updateCourse(courseId, course).subscribe((updatedCourse) => {
+        const index = this.courses.findIndex(c => c.id === courseId);
+        this.courses[index] = updatedCourse;
         this.courseForm.reset();
         this.isLoading = false;
       });
