@@ -42,7 +42,7 @@ export class CourseComponent  implements OnInit {
   statusService = inject(StatusService);
   isLoading = true;
 
-  items = new Array(5);
+  items = new Array(6);
   statuses : Status[] = []
 
   showAddCourseDialog() {
