@@ -155,6 +155,7 @@ export class DocumentComponent extends CrudComponent<Document> implements OnInit
     this.isEditing = true;
     this.selectedDocument = { ...document };
     this.documentDialog = true;
+    this.dialogVisible = true;
   }
 
   truncateUrlLogo(url: string): string {
