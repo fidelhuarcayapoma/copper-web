@@ -35,8 +35,6 @@ export class EquipmentFormComponent {
 
   _equipment: Equipment | null = null;
 
-
-
   @Input() set equipment(equipment: Equipment | null) {
     this._equipment = equipment;
     this.initForm();
@@ -45,8 +43,6 @@ export class EquipmentFormComponent {
   get equipment(): Equipment | null {
     return this._equipment;
   }
- 
-
 
   private initForm() {
     this.form = new FormGroup({
@@ -64,13 +60,6 @@ export class EquipmentFormComponent {
   }
 
   onSubmit() {
-    if (this.form.invalid) {
-      this.submitted = true;
-      this.form.markAsDirty();
-
-      return;
-    }
-
     this.save.emit(this.form);
 
   }

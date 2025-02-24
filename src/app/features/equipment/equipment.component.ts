@@ -47,7 +47,7 @@ export class EquipmentComponent extends CrudComponent<Equipment> {
     private areaService: AreaService,
     private statusService: StatusService,
     private miningUnitService: MiningUnitService,
-  ) { 
+  ) {
     super();
   }
 
@@ -55,18 +55,10 @@ export class EquipmentComponent extends CrudComponent<Equipment> {
     this.loadAreas();
     this.loadEquipment();
     this.loadStatuses();
-    this.initForm();
   }
 
 
-  initForm() {
-    this.equipmentForm = new FormGroup({
-      name: new FormControl(null, [Validators.required]),
-      miningUnitId: new FormControl(null, [Validators.required]),
-      areaId: new FormControl(null, [Validators.required]),
-      statusId: new FormControl(null, []),
-    })
-  }
+
   loadAreas() {
     this.areaService.getAreas().subscribe({
       next: (data) => {
@@ -100,7 +92,7 @@ export class EquipmentComponent extends CrudComponent<Equipment> {
     });
   }
 
- 
+
 
   deleteEquipment(equipment: any) {
     this.confirmationService.confirm({
@@ -135,37 +127,42 @@ export class EquipmentComponent extends CrudComponent<Equipment> {
   saveEquipment(form: FormGroup) {
     this.submitted = true;
     this.equipmentForm = form;
+    console.log("save")
+    if (this.equipmentForm.invalid) {
+      this.equipmentForm.markAsDirty();
+      return;
 
-    if (this.equipmentForm.valid) {
-      const equipmentData = this.equipmentForm.value;
-      if (this.selectedEquipment?.id) {
-        this.equipmentService.updateEquipment(this.selectedEquipment.id, equipmentData).subscribe({
-          next: (result) => {
-            this.loadEquipment();
-            this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Equipment Updated', life: 3000 });
-          },
-          error: (error) => {
-            console.error('Error updating equipment', error);
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update Equipment', life: 3000 });
-          }
-        });
-      } else {
-        this.equipmentService.createEquipment(equipmentData).subscribe({
-          next: (result) => {
-            this.loadEquipment();
-            this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Equipment Created', life: 3000 });
-          },
-          error: (error) => {
-            console.error('Error creating equipment', error);
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create Equipment', life: 3000 });
-          }
-        }
-        );
-      }
-
-      this.equipmentDialog = false;
-      this.initForm();
     }
+    const equipmentData = this.equipmentForm.value;
+    if (this.selectedEquipment?.id) {
+      this.equipmentService.updateEquipment(this.selectedEquipment.id, equipmentData).subscribe({
+        next: (result) => {
+          this.loadEquipment();
+          this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Equipment Updated', life: 3000 });
+          this.hideDialog();
+        },
+        error: (error) => {
+          console.error('Error updating equipment', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update Equipment', life: 3000 });
+        }
+      });
+    } else {
+      this.equipmentService.createEquipment(equipmentData).subscribe({
+        next: (result) => {
+          this.loadEquipment();
+          this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Equipment Created', life: 3000 });
+          this.hideDialog();
+        },
+        error: (error) => {
+          console.error('Error creating equipment', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create Equipment', life: 3000 });
+        }
+      }
+      );
+    }
+
+    this.equipmentDialog = false;
+
   }
 
   findIndexById(id: number): number {
@@ -182,10 +179,10 @@ export class EquipmentComponent extends CrudComponent<Equipment> {
 
   changeMiningUnit(event: any) {
     this.areaService.getAreasByMiningUnitId(event.value).subscribe({
-      next:(data) => {
+      next: (data) => {
         this.areas = data;
       },
-      error:(error) => {
+      error: (error) => {
         console.error('Error loading areas', error);
       }
     });
@@ -196,5 +193,9 @@ export class EquipmentComponent extends CrudComponent<Equipment> {
   }
   override deleteItem(id: number): void {
     this.deleteEquipment(id);
+  }
+
+  override hideDialog(): void {
+    this.dialogVisible = false;
   }
 }
