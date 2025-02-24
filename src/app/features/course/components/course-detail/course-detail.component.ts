@@ -88,49 +88,80 @@ export class CourseDetailComponent implements OnInit {
     this.initializeContextMenu();
   }
 
-  loadTopics() {
+  loadTopics() { 
     if (!this.courseId) return;
-
+  
     this.topicService.getTopicsByCourseId(this.courseId).subscribe(topics => {
       this.nodes = topics.map(topic => ({
         key: topic.id + '',
         label: topic.name,
-        children: [],
+        children: [
+          {
+            key: `videos-${topic.id}`,
+            label: 'Clases grabadas',
+            children: [],
+            icon: 'pi pi-video',
+            leaf: false
+          },
+          {
+            key: `resources-${topic.id}`,
+            label: 'Recursos descargables',
+            children: [],
+            icon: 'pi pi-file',
+            leaf: false
+          }
+        ],
         leaf: false
       }));
+  
       this.loading = false;
     });
   }
-
+  
   onNodeExpand(event: any) {
     const node = event.node;
-
-    // Solo cargar videos si el nodo no tiene hijos ya cargados
+  
     if (node.children.length === 0) {
-      const topicId = parseInt(node.key);
-
+      node.children = [{ key: 'loading', label: 'Cargando...', icon: 'pi pi-spin pi-spinner', leaf: true }];
+  
+      const topicId = parseInt(node.key.split('-')[1]);
+  
       this.resourceService.getVideosByCourseId(topicId).subscribe({
         next: (resources) => {
-          node.children = resources.map(resource => ({
-            key: `video-${resource.id}`,
+          // Filtrar SOLO videos si el nodo expandido es "Clases grabadas"
+          let filteredResources = resources;
+          if (node.label === 'Clases grabadas') {
+            filteredResources = resources.filter(resource => resource.resourceType.code === 'VIDEO');
+          }else if (node.label === 'Recursos descargables') {
+            filteredResources = resources.filter(resource => resource.resourceType.code !== 'VIDEO');
+          }
+  
+          node.children = filteredResources.map(resource => ({
+            key: `resource-${resource.id}`,
             label: resource.title,
-            type: resource.resourceType.code?.toLocaleLowerCase(),
+            type: resource.resourceType.code?.toLowerCase(),
             data: this.convertVideoUrl(resource.url),
             icon: `pi pi-fw pi-${resource.resourceType.code === 'VIDEO' ? 'vimeo' : 'file-pdf'}`,
             leaf: true
+          }));
+  
+          if (node.children.length === 0) {
+            node.children = [{ key: 'empty', label: 'No hay recursos disponibles', icon: 'pi pi-info-circle', leaf: true }];
           }
-          ));
         },
         error: () => {
+          node.children = [];
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Error al cargar los videos'
+            detail: 'Error al cargar los recursos'
           });
         }
       });
     }
   }
+  
+  
 
   showAddTopicDialog() {
     this.showDialog = true;
