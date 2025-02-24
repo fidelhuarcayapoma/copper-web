@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CourseService } from '../../services/course.service';
 import { ResourceService } from '../../services/resource.service';
@@ -49,6 +49,7 @@ export class CourseDetailComponent implements OnInit {
   topicService = inject(TopicService);
   messageService = inject(MessageService);
   confirmationService = inject(ConfirmationService);
+  cd = inject(ChangeDetectorRef);
 
   courseId: number | null = null;
   nodes!: TreeNode[];
@@ -224,7 +225,7 @@ export class CourseDetailComponent implements OnInit {
           } else if (this.selectedNode?.type === ResourceCode.PDF || this.selectedNode?.type?.toLocaleUpperCase() === ResourceCode.VIDEO) {
             if (!this.selectedNode?.key) {
               return;
-            } console.log(this.selectedNode.key);
+            } 
 
             this.deleteResource(this.selectedNode.key)
           }
@@ -345,19 +346,25 @@ export class CourseDetailComponent implements OnInit {
     const idResource = parseInt(key.split('-')[1]);
     this.resourceService.delete(idResource).subscribe({
       next: () => {
-        if (this.selectedNode) {
-          this.selectedNode.children = this.selectedNode.children?.filter(node => node.key !== key);
-
-        }
+        // Se actualiza el árbol eliminando el nodo con la key indicada
+        this.nodes = this.removeNode(this.nodes, key);
         this.messageService.add({
           severity: 'success',
           summary: 'Éxito',
           detail: 'Recurso eliminado correctamente'
         });
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al eliminar el recurso'
+        });
       }
     });
-
   }
+  
+  
 
   private convertVideoUrl(url: string): string {
     const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
@@ -382,5 +389,20 @@ export class CourseDetailComponent implements OnInit {
 
     return url;
   }
+
+private removeNode(nodes: TreeNode[], key: string): TreeNode[] {
+  return nodes.reduce((acc: TreeNode[], node: TreeNode) => {
+    // Si la key del nodo coincide, se omite (no se agrega al acumulador)
+    if (node.key === key) {
+      return acc;
+    }
+    // Si tiene hijos, se recorre recursivamente
+    if (node.children && node.children.length) {
+      node.children = this.removeNode(node.children, key);
+    }
+    acc.push(node);
+    return acc;
+  }, []);
+}
 
 }
