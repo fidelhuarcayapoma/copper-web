@@ -127,7 +127,6 @@ export class EquipmentComponent extends CrudComponent<Equipment> {
   saveEquipment(form: FormGroup) {
     this.submitted = true;
     this.equipmentForm = form;
-    console.log("save")
     if (this.equipmentForm.invalid) {
       this.equipmentForm.markAsDirty();
       return;

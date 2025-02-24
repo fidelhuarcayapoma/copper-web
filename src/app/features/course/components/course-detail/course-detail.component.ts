@@ -36,7 +36,7 @@ import { ResourceCode } from '../../../../shared/common/resource-code';
     CourseService,
     TopicService,
     MessageService,
-     DialogService, 
+    DialogService,
 
   ],
   templateUrl: './course-detail.component.html',
@@ -108,8 +108,8 @@ export class CourseDetailComponent implements OnInit {
     if (node.children.length === 0) {
       const topicId = parseInt(node.key);
 
-      this.resourceService.getVideosByCourseId(topicId).subscribe(
-        resources => {
+      this.resourceService.getVideosByCourseId(topicId).subscribe({
+        next: (resources) => {
           node.children = resources.map(resource => ({
             key: `video-${resource.id}`,
             label: resource.title,
@@ -120,14 +120,14 @@ export class CourseDetailComponent implements OnInit {
           }
           ));
         },
-        error => {
+        error: () => {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
             detail: 'Error al cargar los videos'
           });
         }
-      );
+      });
     }
   }
 
@@ -197,7 +197,7 @@ export class CourseDetailComponent implements OnInit {
         icon: 'pi pi-video',
         command: () => {
           if (this.selectedNode && !this.selectedNode.type) {
-            this.resourceCode =  ResourceCode.VIDEO;
+            this.resourceCode = ResourceCode.VIDEO;
             this.showAddVideoDialog();
           }
         }
@@ -207,7 +207,7 @@ export class CourseDetailComponent implements OnInit {
         icon: 'pi pi-file',
         command: () => {
           if (this.selectedNode && !this.selectedNode.type) {
-            this.resourceCode =  ResourceCode.FILE;
+            this.resourceCode = ResourceCode.FILE;
             this.showAddFileDialog();
           }
         }
@@ -216,18 +216,25 @@ export class CourseDetailComponent implements OnInit {
         separator: true
       },
       {
-        label: 'Eliminar Tema',
+        label: 'Eliminar',
         icon: 'pi pi-trash',
-        command: (event) => {console.log(this.selectedNode);console.log(event);
+        command: (event) => {
           if (this.selectedNode && !this.selectedNode.type) {
             this.deleteTopic();
+          } else if (this.selectedNode?.type === ResourceCode.PDF || this.selectedNode?.type?.toLocaleUpperCase() === ResourceCode.VIDEO) {
+            if (!this.selectedNode?.key) {
+              return;
+            } console.log(this.selectedNode.key);
+
+            this.deleteResource(this.selectedNode.key)
           }
         }
       }
     ];
   }
 
-  onContextMenuSelect(event: any) {console.log(event);
+  onContextMenuSelect(event: any) {
+    console.log(event);
     this.selectedNode = event.node;
   }
 
@@ -247,7 +254,7 @@ export class CourseDetailComponent implements OnInit {
   saveResource(form: FormGroup) {
     if (form.invalid || !this.selectedNode?.key) {
       return
-    } 
+    }
     const resourceData = {
       ...form.value,
       topicId: parseInt(this.selectedNode.key)
@@ -255,9 +262,6 @@ export class CourseDetailComponent implements OnInit {
 
     this.resourceService.createResource(resourceData).subscribe({
       next: (res) => {
-       
-        console.log(res);
-       
         let message = '';
         let videoNode = null;
         if (this.resourceCode === ResourceCode.FILE) {
@@ -283,8 +287,6 @@ export class CourseDetailComponent implements OnInit {
           };
         }
         if (this.selectedNode && videoNode) {
-   
-
           this.selectedNode.children = [...(this.selectedNode.children || []), videoNode];
         }
         this.messageService.add({
@@ -307,7 +309,7 @@ export class CourseDetailComponent implements OnInit {
 
   }
 
-  deleteTopic() {console.log(this.selectedNode);
+  deleteTopic() {
     this.confirmationService.confirm({
       message: '¿Está seguro que desea eliminar este tema y todos sus videos?',
       header: 'Confirmar eliminación',
@@ -338,6 +340,25 @@ export class CourseDetailComponent implements OnInit {
     });
 
   }
+
+  deleteResource(key: string): void {
+    const idResource = parseInt(key.split('-')[1]);
+    this.resourceService.delete(idResource).subscribe({
+      next: () => {
+        if (this.selectedNode) {
+          this.selectedNode.children = this.selectedNode.children?.filter(node => node.key !== key);
+
+        }
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Recurso eliminado correctamente'
+        });
+      }
+    });
+
+  }
+
   private convertVideoUrl(url: string): string {
     const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
     if (vimeoMatch) {

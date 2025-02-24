@@ -18,4 +18,8 @@ import { Resource } from '../interfaces/video.interfsce';
     createResource(resource: any): Observable<Resource> {
       return this.http.post<Resource>(`${environment.msManager}/resources`, resource);
     }
+ 
+   delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.msManager}/resources/${id}`);  
+   }
   }
