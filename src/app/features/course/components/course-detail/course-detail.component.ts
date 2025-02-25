@@ -88,9 +88,9 @@ export class CourseDetailComponent implements OnInit {
     this.initializeContextMenu();
   }
 
-  loadTopics() { 
+  loadTopics() {
     if (!this.courseId) return;
-  
+
     this.topicService.getTopicsByCourseId(this.courseId).subscribe(topics => {
       this.nodes = topics.map(topic => ({
         key: topic.id + '',
@@ -113,55 +113,87 @@ export class CourseDetailComponent implements OnInit {
         ],
         leaf: false
       }));
-  
+
+      console.log("Estructura inicial de nodos:", this.nodes);
       this.loading = false;
     });
   }
-  
+
+
   onNodeExpand(event: any) {
     const node = event.node;
-  
-    if (node.children.length === 0) {
-      node.children = [{ key: 'loading', label: 'Cargando...', icon: 'pi pi-spin pi-spinner', leaf: true }];
-  
-      const topicId = parseInt(node.key.split('-')[1]);
-  
-      this.resourceService.getVideosByCourseId(topicId).subscribe({
-        next: (resources) => {
-          // Filtrar SOLO videos si el nodo expandido es "Clases grabadas"
-          let filteredResources = resources;
-          if (node.label === 'Clases grabadas') {
-            filteredResources = resources.filter(resource => resource.resourceType.code === 'VIDEO');
-          }else if (node.label === 'Recursos descargables') {
-            filteredResources = resources.filter(resource => resource.resourceType.code !== 'VIDEO');
-          }
-  
-          node.children = filteredResources.map(resource => ({
-            key: `resource-${resource.id}`,
-            label: resource.title,
-            type: resource.resourceType.code?.toLowerCase(),
-            data: this.convertVideoUrl(resource.url),
-            icon: `pi pi-fw pi-${resource.resourceType.code === 'VIDEO' ? 'vimeo' : 'file-pdf'}`,
-            leaf: true
-          }));
-  
-          if (node.children.length === 0) {
-            node.children = [{ key: 'empty', label: 'No hay recursos disponibles', icon: 'pi pi-info-circle', leaf: true }];
-          }
-        },
-        error: () => {
-          node.children = [];
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Error al cargar los recursos'
-          });
-        }
-      });
+
+    const hasVideoAndResourceChildren = node.children &&
+      node.children.some((child: any) => child.label === 'Clases grabadas') &&
+      node.children.some((child: any) => child.label === 'Recursos descargables');
+
+    if (hasVideoAndResourceChildren) {
+      return;
     }
+
+    let topicId: number | null = null;
+
+    if (node.parent && !isNaN(parseInt(node.parent.key))) {
+      topicId = parseInt(node.parent.key);
+    } else {
+      try {
+        if (node.key.includes('-')) {
+          topicId = parseInt(node.key.split('-')[1]);
+        } else {
+          topicId = parseInt(node.key);
+        }
+      } catch (e) {
+        console.error("Failed to determine topic ID", e);
+        return;
+      }
+    }
+
+    if (!topicId) {
+      return;
+    }
+
+    node.children = [{ key: 'loading', label: 'Cargando...', icon: 'pi pi-spin pi-spinner', leaf: true }];
+    this.resourceService.getVideosByCourseId(topicId).subscribe({
+      next: (resources) => {
+        let filteredResources = resources;
+
+        const isVideoNode = node.label === 'Clases grabadas';
+        const isResourceNode = node.label === 'Recursos descargables';
+
+        if (isVideoNode) {
+          filteredResources = resources.filter(resource => resource.resourceType.code === 'VIDEO');
+        } else if (isResourceNode) {
+          filteredResources = resources.filter(resource => resource.resourceType.code !== 'VIDEO');
+        }
+
+        node.children = filteredResources.map(resource => ({
+          key: `resource-${resource.id}`,
+          label: resource.title,
+          type: resource.resourceType.code?.toLowerCase(),
+          data: this.convertVideoUrl(resource.url),
+          icon: `pi pi-fw pi-${resource.resourceType.code === 'VIDEO' ? 'vimeo' : 'file-pdf'}`,
+          leaf: true
+        }));
+
+        if (node.children.length === 0) {
+          node.children = [{ key: 'empty', label: 'No hay recursos disponibles', icon: 'pi pi-info-circle', leaf: true }];
+        }
+
+        this.cd.markForCheck();
+      },
+      error: () => {
+        node.children = [];
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al cargar los recursos'
+        });
+      }
+    });
   }
-  
-  
+
+
+
 
   showAddTopicDialog() {
     this.showDialog = true;
@@ -256,7 +288,7 @@ export class CourseDetailComponent implements OnInit {
           } else if (this.selectedNode?.type === ResourceCode.PDF || this.selectedNode?.type?.toLocaleUpperCase() === ResourceCode.VIDEO) {
             if (!this.selectedNode?.key) {
               return;
-            } 
+            }
 
             this.deleteResource(this.selectedNode.key)
           }
@@ -284,62 +316,100 @@ export class CourseDetailComponent implements OnInit {
   }
 
   saveResource(form: FormGroup) {
-    if (form.invalid || !this.selectedNode?.key) {
-      return
+    if (form.invalid || !this.selectedNode || !this.selectedNode?.key) {
+      return;
     }
+    const topicId = ['videos', 'resources'].some(key => this.selectedNode?.key?.startsWith(key + '-'))
+      ? parseInt(this.selectedNode.key.split('-')[1])
+      : parseInt(this.selectedNode.key);
+
     const resourceData = {
       ...form.value,
-      topicId: parseInt(this.selectedNode.key)
+      topicId: topicId,
     };
+
 
     this.resourceService.createResource(resourceData).subscribe({
       next: (res) => {
         let message = '';
-        let videoNode = null;
+        let resourceNode = null;
+
         if (this.resourceCode === ResourceCode.FILE) {
           message = 'Archivo agregado correctamente';
-          videoNode = {
+          resourceNode = {
             key: `file-${res.id}`,
             label: res.title,
-            type: res.resourceType.code?.toLocaleLowerCase(),
+            type: res.resourceType.code?.toLowerCase(),
             data: res.url,
             icon: 'pi pi-fw pi-file-pdf',
             leaf: true
           };
-
         } else if (this.resourceCode === ResourceCode.VIDEO) {
           message = 'Video agregado correctamente';
-          videoNode = {
+          resourceNode = {
             key: `video-${res.id}`,
             label: res.title,
-            type: res.resourceType.code?.toLocaleLowerCase(),
+            type: res.resourceType.code?.toLowerCase(),
             data: this.convertVideoUrl(res.url),
             icon: 'pi pi-fw pi-vimeo',
             leaf: true
           };
         }
-        if (this.selectedNode && videoNode) {
-          this.selectedNode.children = [...(this.selectedNode.children || []), videoNode];
-        }
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Éxito',
-          detail: message
-        });
 
-        this.showVideoFormDialog = false;
-        this.resourceForm.reset();
+        if (resourceNode && this.selectedNode) {
+          let targetNode = this.selectedNode;
+
+          // 🔹 Verificar si el nodo seleccionado es un tema (no una subcategoría)
+          if (!this.selectedNode.key?.startsWith('videos-') && !this.selectedNode.key?.startsWith('resources-')) {
+            // Asegurar que el nodo tiene hijos
+            if (!this.selectedNode.children) {
+              this.selectedNode.children = [];
+            }
+
+            // 🔹 Buscar los nodos "Clases grabadas" o "Recursos descargables" sin duplicar
+            let classNode = this.selectedNode.children.find(child => child.key === `videos-${this.selectedNode?.key}`);
+            let resourceNodeGroup = this.selectedNode.children.find(child => child.key === `recursos-${this.selectedNode?.key}`);
+
+            if (this.resourceCode === ResourceCode.VIDEO) {
+              if (!classNode) {
+                classNode = { key: `videos-${this.selectedNode.key}`, label: 'Clases grabadas', children: [], leaf: false };
+                this.selectedNode.children = [...this.selectedNode.children, classNode]; // Agrega solo si no existe
+              }
+              targetNode = classNode;
+            } else if (this.resourceCode === ResourceCode.FILE) {
+              if (!resourceNodeGroup) {
+                resourceNodeGroup = { key: `resources-${this.selectedNode.key}`, label: 'Recursos descargables', children: [], leaf: false };
+                this.selectedNode.children = [...this.selectedNode.children, resourceNodeGroup]; // Agrega solo si no existe
+              }
+              targetNode = resourceNodeGroup;
+            }
+          }
+
+          // 🔹 Agregar el recurso al nodo correcto
+          targetNode.children = [...(targetNode.children || []), resourceNode];
+
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: message
+          });
+
+          this.showVideoFormDialog = false;
+          this.resourceForm.reset();
+        }
       },
       error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Error al agregar el video'
+          detail: 'Error al agregar el recurso'
         });
       }
     });
-
   }
+
+
+
 
   deleteTopic() {
     this.confirmationService.confirm({
@@ -394,8 +464,8 @@ export class CourseDetailComponent implements OnInit {
       }
     });
   }
-  
-  
+
+
 
   private convertVideoUrl(url: string): string {
     const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
@@ -421,19 +491,19 @@ export class CourseDetailComponent implements OnInit {
     return url;
   }
 
-private removeNode(nodes: TreeNode[], key: string): TreeNode[] {
-  return nodes.reduce((acc: TreeNode[], node: TreeNode) => {
-    // Si la key del nodo coincide, se omite (no se agrega al acumulador)
-    if (node.key === key) {
+  private removeNode(nodes: TreeNode[], key: string): TreeNode[] {
+    return nodes.reduce((acc: TreeNode[], node: TreeNode) => {
+      // Si la key del nodo coincide, se omite (no se agrega al acumulador)
+      if (node.key === key) {
+        return acc;
+      }
+      // Si tiene hijos, se recorre recursivamente
+      if (node.children && node.children.length) {
+        node.children = this.removeNode(node.children, key);
+      }
+      acc.push(node);
       return acc;
-    }
-    // Si tiene hijos, se recorre recursivamente
-    if (node.children && node.children.length) {
-      node.children = this.removeNode(node.children, key);
-    }
-    acc.push(node);
-    return acc;
-  }, []);
-}
+    }, []);
+  }
 
 }
