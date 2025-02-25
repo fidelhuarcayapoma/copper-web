@@ -114,7 +114,6 @@ export class CourseDetailComponent implements OnInit {
         leaf: false
       }));
 
-      console.log("Estructura inicial de nodos:", this.nodes);
       this.loading = false;
     });
   }
@@ -298,7 +297,6 @@ export class CourseDetailComponent implements OnInit {
   }
 
   onContextMenuSelect(event: any) {
-    console.log(event);
     this.selectedNode = event.node;
   }
 
