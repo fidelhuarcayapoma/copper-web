@@ -1,9 +1,12 @@
 [build]
-  publish = "/dist/copper-web/browser"
-  command = "npm run build"
-  base = "/"
+  command = "ng build:ssr && ng run alyteq-front:server"
+  publish = "dist/alyteq-front/browser"
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/server"
   status = 200
+
+[[functions]]
+  directory = "dist/alyteq-front/server"
+  external_node_modules = ["@angular/ssr"]
